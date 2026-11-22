@@ -57,7 +57,7 @@
 
 <header class="sticky top-0 z-10 bg-gradient-to-r from-[#14532d] via-[#1c6b41] to-[#14532d] shadow-lg">
   <div class="max-w-7xl mx-auto px-4 pt-3 pb-1 flex items-center gap-2">
-    <h1 id="logoTitle" class="font-xmas text-3xl sm:text-4xl text-white tracking-wide flex-1 cursor-pointer select-none">🎄 Wish List</h1>
+    <h1 id="logoTitle" class="font-xmas text-3xl sm:text-4xl text-white tracking-wide flex-1 cursor-pointer select-none">🎄 Christmas Wish List</h1>
     <div id="who" class="hidden flex items-center gap-2">
       <button id="snowBtn" class="btn ghost text-sm" title="Toggle snowfall">❄️</button>
       <button id="invite" class="btn ghost text-sm">Invite</button>
@@ -378,7 +378,7 @@ async function start() {
   fam = [me, ...data.filter(p => p.id !== uid)];
   $('#meAv').innerHTML = av(me);
   show('listView'); route(); checkPrefill(); season();
-  if (new Date().getMonth() === 11 && localStorage.snow !== 'off'
+  if (localStorage.snow !== 'off'
       && !matchMedia('(prefers-reduced-motion: reduce)').matches) toggleSnow(true);
 }
 
