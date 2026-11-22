@@ -47,6 +47,16 @@
   dialog::backdrop{background:#3b1d1466;backdrop-filter:blur(3px)}
   dialog[open]{animation:pop .25s ease} @keyframes pop{from{transform:scale(.92);opacity:0}}
   .fade{animation:fade .35s ease} @keyframes fade{from{opacity:0;transform:translateY(8px)}}
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none}}
+  #treeTx{transition:opacity .35s ease}
+  #treeTx.tx-hide{opacity:0}
+  #treeTx .part{transform-box:fill-box;transform-origin:50% 100%;opacity:0}
+  #treeTx.play .grow{animation:txGrow .45s cubic-bezier(.34,1.4,.64,1) both}
+  #treeTx.play .pop{animation:txPop .38s cubic-bezier(.34,1.8,.64,1) both}
+  @keyframes txGrow{from{transform:scale(.15);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes txPop{0%{transform:scale(0);opacity:0}70%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:1}}
   dialog form{max-height:90vh;overflow-y:auto}
   #toast{max-width:92vw;text-align:center}
   #snowCv{position:fixed;inset:0;pointer-events:none;z-index:5}
@@ -84,7 +94,7 @@
   <section id="listView" class="hidden">
     <div class="lg:flex lg:gap-6 lg:items-start">
       <aside class="lg:w-64 lg:shrink-0 lg:sticky lg:top-24 mb-5 lg:mb-0">
-        <div class="card p-3">
+        <div class="card reveal rv-t p-3">
           <button id="famToggle" type="button" class="w-full flex items-center justify-between font-bold px-1" onclick="document.getElementById('famList').classList.toggle('hidden')">🎄 Family lists <span class="lg:hidden">▾</span></button>
           <div id="famList" class="hidden lg:block mt-2 space-y-1"></div>
         </div>
@@ -97,7 +107,7 @@
       <button id="shareList" class="btn ghost">Share</button>
       <button id="addBtn" class="btn red">+ Add wish</button>
     </div>
-    <div id="bmBar" class="hidden card p-4 mb-5 text-sm space-y-2">
+    <div id="bmBar" class="hidden card reveal rv-t p-4 mb-5 text-sm space-y-2">
       <p><strong>Adding from Etsy, Amazon, Nike, or another store that blocks lookup?</strong> Drag this button to your bookmarks bar. Then open the item's own page in that store, not a search results or shop page, and click the bookmark there. It reads the name, photo, and price from the page you are looking at and opens your list with everything filled in.</p>
       <a id="bmLink" class="btn red inline-block" href="javascript:(function(){var m=function(k){var e=document.querySelector('meta[property=&quot;'+k+'&quot;],meta[name=&quot;'+k+'&quot;]');return e?e.content:''};var price='';try{var ss=document.querySelectorAll('script');for(var i=0;i<ss.length;i++){if(ss[i].type!=='application/ld+json')continue;var j=JSON.parse(ss[i].textContent);var a=[j].concat(j['@graph']||[]);for(var x=0;x<a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';}}}}catch(e){}var img=m('og:image');if(!img){var dyn=document.querySelector('[data-a-dynamic-image]');if(dyn){var mm=dyn.getAttribute('data-a-dynamic-image').match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);if(mm)img=mm[0].replace(/_AC_SS\d+_/,'_AC_SL500_');}}var name=m('og:title')||document.title;var pt=document.querySelector('#productTitle');if(pt)name=pt.textContent.trim().replace(/\s+/g,' ');var p=new URLSearchParams({prefill:'1',name:name,url:location.href,image:img,price:String(price||m('product:price:amount')||''),store:m('og:site_name')});window.open('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(),'_blank');})()">🎁 Add to my Wish List</a>
       <p class="text-xs opacity-60">Works in desktop browsers. On a phone, paste the link as usual and use the photo tip in the add form.</p>
@@ -129,7 +139,7 @@
       </div>
     </div>
   </section>
-  <footer class="text-center text-sm opacity-60 pb-10 pt-4">Made with ❤️ for the family · 🎄 Merry Christmas 🎁</footer>
+  <footer class="reveal rv-t text-center text-sm opacity-60 pb-10 pt-4">Made with ❤️ for the family · 🎄 Merry Christmas 🎁</footer>
 </main>
 
 <dialog id="itemDlg"><form id="itemForm" class="p-6 space-y-3">
@@ -177,6 +187,27 @@
 
 <div id="toast" role="status" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#3b1d14] text-white px-5 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50"></div>
 
+<div id="treeTx" class="fixed inset-0 z-40 hidden place-items-center bg-[#14532d]/95" aria-hidden="true">
+  <div class="text-center px-4">
+    <svg viewBox="0 0 200 230" class="w-52 h-auto mx-auto" role="img" aria-label="Christmas tree being decorated">
+      <rect class="part grow" style="animation-delay:.02s" x="92" y="196" width="16" height="22" rx="2" fill="#8b5a2b"/>
+      <path class="part grow" style="animation-delay:.36s" d="M100 100 L156 172 L44 172 Z" fill="#16a34a"/>
+      <path class="part grow" style="animation-delay:.24s" d="M100 62 L140 122 L60 122 Z" fill="#22a355"/>
+      <path class="part grow" style="animation-delay:.12s" d="M100 28 L128 78 L72 78 Z" fill="#1f8a4c"/>
+      <ellipse class="part pop" style="animation-delay:.48s" cx="100" cy="208" rx="62" ry="9" fill="#ffffff" opacity=".92"/>
+      <circle class="part pop" style="animation-delay:.56s" cx="100" cy="58" r="5.5" fill="#ef4444"/>
+      <circle class="part pop" style="animation-delay:.64s" cx="86" cy="96" r="5.5" fill="#f4c430"/>
+      <circle class="part pop" style="animation-delay:.72s" cx="116" cy="100" r="5.5" fill="#f9a8d4"/>
+      <circle class="part pop" style="animation-delay:.8s" cx="78" cy="138" r="5.5" fill="#60a5fa"/>
+      <circle class="part pop" style="animation-delay:.88s" cx="104" cy="132" r="5.5" fill="#ef4444"/>
+      <circle class="part pop" style="animation-delay:.96s" cx="124" cy="150" r="5.5" fill="#f4c430"/>
+      <circle class="part pop" style="animation-delay:1.04s" cx="92" cy="160" r="5.5" fill="#f9a8d4"/>
+      <polygon class="part pop" style="animation-delay:1.14s;filter:drop-shadow(0 0 7px #f4c430)" points="100,2 103.5,10.5 112.5,11 105.5,16.8 107.8,25.5 100,20.8 92.2,25.5 94.5,16.8 87.5,11 96.5,10.5" fill="#f4c430"/>
+    </svg>
+    <p id="txMsg" class="font-xmas text-3xl text-white mt-2">Decorating the tree…</p>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://knxepbzsjzvcuplimjgv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hd1yW5Gne9PKJzDXt2BEuQ_Pm_vi4ch';
@@ -220,8 +251,37 @@ function toast(msg) {
   clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.add('opacity-0'), 2800);
 }
 function show(view) {
+  const fromAuth = view === 'listView' && !$('#authView').classList.contains('hidden');
   for (const v of ['authView', 'listView']) $('#' + v).classList.toggle('hidden', v !== view);
   $('#who').classList.toggle('hidden', view === 'authView');
+  if (fromAuth) treeTransition();
+}
+
+// ---------- scroll reveal + tree-building page transition ----------
+const seenCards = new Set();
+const io = new IntersectionObserver(es => es.forEach(en => {
+  const el = en.target;
+  if (el.classList.contains('rv-t')) { el.classList.toggle('in', en.isIntersecting); return; }
+  if (en.isIntersecting) {
+    el.classList.add('in');
+    if (el.dataset.cid) seenCards.add(el.dataset.cid);
+    io.unobserve(el);
+    setTimeout(() => el.classList.remove('reveal'), 750);
+  }
+}), {threshold: .1});
+function watchReveals() { document.querySelectorAll('.reveal:not(.in)').forEach(el => io.observe(el)); }
+
+const TX_MSGS = ['Decorating the tree…', 'Hanging the ornaments…', 'Untangling the lights…', 'Placing the star…', 'Fluffing the branches…'];
+let txBusy = false, shownOwner = null;
+function treeTransition() {
+  if (txBusy || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  txBusy = true;
+  const tx = $('#treeTx');
+  $('#txMsg').textContent = TX_MSGS[Math.floor(Math.random() * TX_MSGS.length)];
+  tx.classList.remove('hidden', 'tx-hide'); tx.classList.add('grid');
+  tx.classList.remove('play'); void tx.offsetWidth; tx.classList.add('play');
+  setTimeout(() => tx.classList.add('tx-hide'), 1300);
+  setTimeout(() => { tx.classList.add('hidden'); tx.classList.remove('grid', 'tx-hide', 'play'); txBusy = false; }, 1700);
 }
 const av = (p, c = 'w-9 h-9') => safe(p.avatar)
   ? `<img src="${esc(p.avatar)}" alt="" class="${c} rounded-full object-cover">`
@@ -434,6 +494,9 @@ async function route() {
   $('#famList').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="famlink ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}<span>${f.id === uid ? 'My list' : esc(f.name)}</span><span class="cnt">${counts[f.id] || 0} wish${counts[f.id] === 1 ? '' : 'es'}</span></a>`).join('');
   $('#grid').innerHTML = items.map((i, ix) => card(i, mine, ix)).join('') ||
     `<div class="col-span-full text-center py-16 space-y-3"><div class="text-6xl animate-bounce">${mine ? '🎁' : '🎄'}</div><p class="text-lg opacity-70">${mine ? 'Your list is empty. Add your first wish! ✨' : 'Nothing here yet. Check back soon!'}</p></div>`;
+  watchReveals();
+  if (shownOwner && shownOwner !== p.id) treeTransition();
+  shownOwner = p.id;
 }
 
 function card(i, mine, ix = 0) {
@@ -442,7 +505,7 @@ function card(i, mine, ix = 0) {
     ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover">`
     : '<span class="text-7xl cursor-pointer" title="Psst… click me" onclick="this.classList.remove(\'wiggle\');void this.offsetWidth;this.classList.add(\'wiggle\');snow()">🎁</span>';
   const sm = 'btn text-sm';
-  return `<article id="item${i.id}" style="animation-delay:${Math.min(ix * 50, 400)}ms" class="card fade flex flex-col relative ${!mine && left <= 0 ? 'ring-2 ring-green-700/40' : ''}">
+  return `<article id="item${i.id}" data-cid="${i.id}" class="card reveal ${seenCards.has(i.id) ? 'in' : ''} flex flex-col relative ${!mine && left <= 0 ? 'ring-2 ring-green-700/40' : ''}">
     ${!mine && left <= 0 ? '<span class="absolute top-4 -right-9 rotate-45 bg-[#1f6f4a] text-white text-xs font-bold px-9 py-1 shadow z-10">Wrapped up!</span>' : ''}
     <div class="aspect-square bg-red-50 grid place-items-center overflow-hidden">${img}</div>
     <div class="p-4 flex flex-col gap-2 flex-1">
