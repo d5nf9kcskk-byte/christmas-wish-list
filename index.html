@@ -26,14 +26,19 @@
   dialog::backdrop{background:#3b1d1466;backdrop-filter:blur(3px)}
   dialog[open]{animation:pop .25s ease} @keyframes pop{from{transform:scale(.92);opacity:0}}
   .fade{animation:fade .35s ease} @keyframes fade{from{opacity:0;transform:translateY(8px)}}
+  dialog form{max-height:90vh;overflow-y:auto}
+  #toast{max-width:92vw;text-align:center}
+  #snowCv{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .wiggle{animation:wig .5s ease} @keyframes wig{25%{transform:rotate(-6deg) scale(1.12)}75%{transform:rotate(6deg) scale(1.12)}}
 </style>
 </head>
 <body class="min-h-screen">
 
 <header class="sticky top-0 z-10 bg-[#fff7ed]/90 backdrop-blur border-b border-orange-100">
   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2">
-    <h1 class="text-lg sm:text-xl font-bold text-[#c0392b] flex-1">🎄 Wish List</h1>
+    <h1 id="logoTitle" class="text-lg sm:text-xl font-bold text-[#c0392b] flex-1 cursor-pointer select-none">🎄 Wish List</h1>
     <div id="who" class="hidden flex items-center gap-2">
+      <button id="snowBtn" class="btn ghost text-sm" title="Toggle snowfall">❄️</button>
       <button id="invite" class="btn ghost text-sm">Invite</button>
       <button id="meAv" onclick="editProfile()" aria-label="Edit profile" class="rounded-full"></button>
       <button id="logout" class="btn ghost text-sm">Sign out</button>
@@ -56,6 +61,7 @@
   </section>
 
   <section id="listView" class="hidden">
+    <div id="seasonBar" class="hidden text-center font-semibold mb-4"></div>
     <div class="flex flex-wrap items-center gap-3 mb-5">
       <h2 id="listTitle" class="text-3xl sm:text-4xl font-bold flex-1"></h2>
       <button id="shareList" class="btn ghost">Share</button>
@@ -153,6 +159,68 @@ function gifts() {
     ticks: 110, origin: {y: .5}, disableForReducedMotion: true});
 }
 
+// ---------- phase 3: snowfall, season bar, easter eggs ----------
+let snowing = false, sctx = null, flakes = [], sraf = 0;
+function toggleSnow(on = !snowing) {
+  snowing = on; localStorage.snow = on ? 'on' : 'off';
+  let cv = $('#snowCv');
+  if (on && !cv) {
+    cv = document.createElement('canvas'); cv.id = 'snowCv'; document.body.append(cv);
+    addEventListener('resize', () => { cv.width = innerWidth; cv.height = innerHeight; });
+  }
+  if (cv) { cv.width = innerWidth; cv.height = innerHeight; cv.style.display = on ? '' : 'none'; }
+  if (!on) return cancelAnimationFrame(sraf);
+  sctx = cv.getContext('2d');
+  const COLORS = ['#ffffff', '#bfdbfe', '#93c5fd', '#dbeafe'];
+  flakes = Array.from({length: Math.min(90, Math.max(30, innerWidth / 14))}, () => ({
+    x: Math.random() * cv.width, y: Math.random() * cv.height, r: 1 + Math.random() * 2.2,
+    s: .4 + Math.random() * 1.1, p: Math.random() * 6.28, c: COLORS[Math.floor(Math.random() * COLORS.length)]}));
+  const tick = () => {
+    if (!snowing) return;
+    sctx.clearRect(0, 0, cv.width, cv.height);
+    for (const f of flakes) {
+      f.y += f.s; f.x += Math.sin(f.p += .01) * .4;
+      if (f.y > cv.height + 4) { f.y = -4; f.x = Math.random() * cv.width; }
+      sctx.fillStyle = f.c; sctx.beginPath(); sctx.arc(f.x, f.y, f.r, 0, 6.29); sctx.fill();
+    }
+    sraf = requestAnimationFrame(tick);
+  };
+  tick();
+}
+$('#snowBtn').onclick = () => toggleSnow();
+
+function season() {
+  const now = new Date(), bar = $('#seasonBar');
+  const days = Math.ceil((new Date(now.getFullYear(), 11, 25) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
+  if (now.getMonth() === 11 && now.getDate() === 25) {
+    bar.textContent = '🎄 Merry Christmas! 🎅';
+    bar.className = 'text-center text-2xl sm:text-3xl font-bold text-[#c0392b] mb-4 fade';
+    gifts();
+  } else if (now.getMonth() === 11 && days > 0) {
+    bar.textContent = `🎄 ${days} sleep${days > 1 ? 's' : ''} until Christmas`;
+    bar.className = 'text-center font-semibold text-[#1f6f4a] mb-4 fade';
+  } else bar.className = 'hidden';
+}
+
+// Easter egg 1: click the title five times.
+let titleClicks = 0, titleTimer = 0;
+$('#logoTitle').onclick = () => {
+  clearTimeout(titleTimer); titleTimer = setTimeout(() => titleClicks = 0, 2500);
+  if (++titleClicks < 5) return;
+  titleClicks = 0;
+  confetti({particleCount: 24, shapes: [confetti.shapeFromText({text: '🎅', scalar: 2})], scalar: 2, spread: 130,
+    ticks: 130, origin: {y: .4}, disableForReducedMotion: true});
+  toast('Ho ho ho! 🎅 You found a secret.');
+};
+// Easter egg 2: type "santa" anywhere.
+let typed = '';
+addEventListener('keydown', e => {
+  if (e.key.length !== 1) return;
+  typed = (typed + e.key.toLowerCase()).slice(-5);
+  if (typed !== 'santa') return;
+  typed = ''; gifts(); toast('🎅 Santa heard you!');
+});
+
 // ---------- auth ----------
 const creds = () => ({email: $('#email').value.trim(), password: $('#pw').value});
 $('#authForm').onsubmit = async e => {
@@ -211,7 +279,9 @@ async function start() {
   if (error) return toast(error.message);
   fam = [me, ...data.filter(p => p.id !== uid)];
   $('#meAv').innerHTML = av(me);
-  show('listView'); route(); checkPrefill();
+  show('listView'); route(); checkPrefill(); season();
+  if (new Date().getMonth() === 11 && localStorage.snow !== 'off'
+      && !matchMedia('(prefers-reduced-motion: reduce)').matches) toggleSnow(true);
 }
 
 function checkPrefill() {
@@ -244,17 +314,17 @@ async function route() {
   if (n !== routeN) return; // a newer route() won
   if (error) return toast(error.message);
   items = data;
-  $('#grid').innerHTML = items.map(i => card(i, mine)).join('') ||
+  $('#grid').innerHTML = items.map((i, ix) => card(i, mine, ix)).join('') ||
     `<p class="col-span-full text-center py-16 text-lg opacity-70">${mine ? 'Your list is empty. Add your first wish! ✨' : 'Nothing here yet 🎁'}</p>`;
 }
 
-function card(i, mine) {
+function card(i, mine, ix = 0) {
   const got = i.claims.reduce((s, c) => s + c.qty, 0), left = i.qty - got;
   const img = safe(i.image)
     ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover">`
-    : '<span class="text-7xl">🎁</span>';
+    : '<span class="text-7xl cursor-pointer" title="Psst… click me" onclick="this.classList.remove(\'wiggle\');void this.offsetWidth;this.classList.add(\'wiggle\');snow()">🎁</span>';
   const sm = 'btn text-sm';
-  return `<article class="card fade flex flex-col ${!mine && left <= 0 ? 'ring-2 ring-green-700/40' : ''}">
+  return `<article style="animation-delay:${Math.min(ix * 50, 400)}ms" class="card fade flex flex-col ${!mine && left <= 0 ? 'ring-2 ring-green-700/40' : ''}">
     <div class="aspect-square bg-red-50 grid place-items-center overflow-hidden">${img}</div>
     <div class="p-4 flex flex-col gap-2 flex-1">
       <div class="flex items-start gap-2">
