@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
 <style>
   body{font-family:Fredoka,system-ui,sans-serif;background:#fff7ed;color:#3b1d14}
@@ -115,7 +115,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};
 const safe = u => /^https?:\/\/./i.test(u || '') ? u : '';
 const BASE = location.origin + location.pathname;
 const DESIRE = ['', 'Nice to have', 'Would like', 'Really want', 'Love it!', 'Dream gift'];
-let uid = null, me = null, fam = [], items = [], shareUrl = '', routeN = 0;
+let uid = undefined, me = null, fam = [], items = [], shareUrl = '', routeN = 0;
 
 const joinId = new URLSearchParams(location.search).get('join');
 if (joinId) { localStorage.join = joinId; history.replaceState(null, '', BASE + location.hash); }
