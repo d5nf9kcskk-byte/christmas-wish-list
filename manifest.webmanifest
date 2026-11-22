@@ -1,0 +1,32 @@
+{
+  "name": "Family Wish List",
+  "short_name": "Wish List",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#fff7ed",
+  "theme_color": "#c0392b",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

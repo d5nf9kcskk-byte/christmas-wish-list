@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Family Wish List</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#c0392b">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
@@ -69,8 +72,31 @@
     </div>
     <div id="bmBar" class="hidden card p-4 mb-5 text-sm space-y-2">
       <p><strong>Adding from Etsy, Amazon, Nike, or another store that blocks lookup?</strong> Drag this button to your bookmarks bar. Then open the item's own page in that store, not a search results or shop page, and click the bookmark there. It reads the name, photo, and price from the page you are looking at and opens your list with everything filled in.</p>
-      <a class="btn red inline-block" href="javascript:(function(){var m=function(k){var e=document.querySelector('meta[property=&quot;'+k+'&quot;],meta[name=&quot;'+k+'&quot;]');return e?e.content:''};var price='';try{var ss=document.querySelectorAll('script');for(var i=0;i<ss.length;i++){if(ss[i].type!=='application/ld+json')continue;var j=JSON.parse(ss[i].textContent);var a=[j].concat(j['@graph']||[]);for(var x=0;x<a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';}}}}catch(e){}var img=m('og:image');if(!img){var dyn=document.querySelector('[data-a-dynamic-image]');if(dyn){var mm=dyn.getAttribute('data-a-dynamic-image').match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);if(mm)img=mm[0].replace(/_AC_SS\d+_/,'_AC_SL500_');}}var name=m('og:title')||document.title;var pt=document.querySelector('#productTitle');if(pt)name=pt.textContent.trim().replace(/\s+/g,' ');var p=new URLSearchParams({prefill:'1',name:name,url:location.href,image:img,price:String(price||m('product:price:amount')||''),store:m('og:site_name')});window.open('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(),'_blank');})()">🎁 Add to my Wish List</a>
+      <a id="bmLink" class="btn red inline-block" href="javascript:(function(){var m=function(k){var e=document.querySelector('meta[property=&quot;'+k+'&quot;],meta[name=&quot;'+k+'&quot;]');return e?e.content:''};var price='';try{var ss=document.querySelectorAll('script');for(var i=0;i<ss.length;i++){if(ss[i].type!=='application/ld+json')continue;var j=JSON.parse(ss[i].textContent);var a=[j].concat(j['@graph']||[]);for(var x=0;x<a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';}}}}catch(e){}var img=m('og:image');if(!img){var dyn=document.querySelector('[data-a-dynamic-image]');if(dyn){var mm=dyn.getAttribute('data-a-dynamic-image').match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);if(mm)img=mm[0].replace(/_AC_SS\d+_/,'_AC_SL500_');}}var name=m('og:title')||document.title;var pt=document.querySelector('#productTitle');if(pt)name=pt.textContent.trim().replace(/\s+/g,' ');var p=new URLSearchParams({prefill:'1',name:name,url:location.href,image:img,price:String(price||m('product:price:amount')||''),store:m('og:site_name')});window.open('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(),'_blank');})()">🎁 Add to my Wish List</a>
       <p class="text-xs opacity-60">Works in desktop browsers. On a phone, paste the link as usual and use the photo tip in the add form.</p>
+      <button type="button" class="btn ghost text-sm" onclick="navigator.clipboard.writeText(document.getElementById('bmLink').href).then(() => toast('Bookmarklet code copied!'))">Copy bookmarklet code (needed for phone setup)</button>
+      <details class="text-sm">
+        <summary class="font-semibold cursor-pointer">On an Android phone: add from the Share button</summary>
+        <ol class="list-decimal ml-5 mt-1 space-y-1">
+          <li>Open this list in Chrome, tap the ⋮ menu, and choose <strong>Add to Home screen</strong> (or Install app).</li>
+          <li>After that, on any item page or in a store app, tap <strong>Share</strong> and choose <strong>Wish List</strong>.</li>
+          <li>Your list opens with the add form ready. The link always comes across; the name comes too when the store provides it, and the photo fills in for stores that allow lookup.</li>
+        </ol>
+      </details>
+      <details class="text-sm">
+        <summary class="font-semibold cursor-pointer">On an iPhone (Safari): bookmarklet setup, one time</summary>
+        <ol class="list-decimal ml-5 mt-1 space-y-1">
+          <li>Tap <strong>Copy bookmarklet code</strong> above.</li>
+          <li>In Safari, open any page and add a bookmark named <strong>Add to Wish List</strong> (Share button, then Add Bookmark).</li>
+          <li>Open Bookmarks, tap Edit, tap that bookmark, delete what is in the address field, and paste the code there. Save.</li>
+          <li>From then on: open the item's own page, open Bookmarks, and tap <strong>Add to Wish List</strong>. Your list opens with name, photo, and price filled in.</li>
+          <li>In Chrome on iPhone, a bookmarklet made on a computer with the same Google account syncs over by itself. To run it, type its name in the address bar and tap the bookmark in the suggestions; do not press Enter.</li>
+        </ol>
+      </details>
+      <details class="text-sm">
+        <summary class="font-semibold cursor-pointer">From the Etsy app</summary>
+        <p class="mt-1">The bookmarklet cannot run inside an app. In the Etsy app, tap Share and Copy Link, then paste the link into the add form here. The name and store fill in; for the photo, open the same link in your phone browser, long-press the photo, open it in a new tab, and copy that address into Image URL.</p>
+      </details>
     </div>
     <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </section>
@@ -136,7 +162,15 @@ if (pfParams.get('prefill')) {
   localStorage.prefill = JSON.stringify({name: pfParams.get('name') || '', url: pfParams.get('url') || '',
     image: pfParams.get('image') || '', price: pfParams.get('price') || '', store: pfParams.get('store') || ''});
   history.replaceState(null, '', BASE + location.hash);
+} else if (pfParams.get('url') || pfParams.get('text') || pfParams.get('title')) {
+  // Android share sheet (Web Share Target): the store app sends title, text, and url as plain parameters.
+  const sText = pfParams.get('text') || '';
+  const sUrl = pfParams.get('url') || (sText.match(/https?:\/\/\S+/) || [''])[0];
+  const sName = pfParams.get('title') || sText.replace(sUrl, '').trim();
+  localStorage.prefill = JSON.stringify({name: sName, url: sUrl, image: '', price: '', store: ''});
+  history.replaceState(null, '', BASE + location.hash);
 }
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.remove('opacity-0');
@@ -297,6 +331,8 @@ function checkPrefill() {
   E.store.value = p.store || '';
   if (p.price) E.price.value = parseFloat(p.price) || '';
   toast('Filled from the store page ✨ Check it and Save.');
+  // Shares from a phone often carry only the link; run the normal lookup to fill the rest.
+  if (!p.name && p.url) { E.url.dataset.done = ''; autofill(); }
 }
 window.onhashchange = () => me && route();
 
