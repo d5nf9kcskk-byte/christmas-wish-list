@@ -25,6 +25,10 @@
   .card:hover{transform:translateY(-4px);box-shadow:0 12px 28px #3b1d141f}
   .chip{display:flex;align-items:center;gap:.5rem;padding:.45rem 1rem .45rem .45rem;border-radius:9999px;background:#fff;white-space:nowrap;font-weight:500;transition:background .2s,color .2s}
   .chip.on{background:#c0392b;color:#fff}
+  .famlink{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:1rem;font-weight:500;width:100%;transition:background .2s,color .2s}
+  .famlink:hover{background:#fff7ed}
+  .famlink.on{background:#c0392b;color:#fff}
+  .famlink .cnt{margin-left:auto;font-size:.8rem;opacity:.7;white-space:nowrap}
   dialog{border-radius:1.75rem;padding:0;width:min(32rem,94vw);max-height:90vh;color:inherit}
   dialog::backdrop{background:#3b1d1466;backdrop-filter:blur(3px)}
   dialog[open]{animation:pop .25s ease} @keyframes pop{from{transform:scale(.92);opacity:0}}
@@ -38,7 +42,7 @@
 <body class="min-h-screen">
 
 <header class="sticky top-0 z-10 bg-[#fff7ed]/90 backdrop-blur border-b border-orange-100">
-  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2">
     <h1 id="logoTitle" class="text-lg sm:text-xl font-bold text-[#c0392b] flex-1 cursor-pointer select-none">🎄 Wish List</h1>
     <div id="who" class="hidden flex items-center gap-2">
       <button id="snowBtn" class="btn ghost text-sm" title="Toggle snowfall">❄️</button>
@@ -47,10 +51,9 @@
       <button id="logout" class="btn ghost text-sm">Sign out</button>
     </div>
   </div>
-  <nav id="fam" class="hidden max-w-6xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto"></nav>
 </header>
 
-<main class="max-w-6xl mx-auto px-4 py-6">
+<main class="max-w-7xl mx-auto px-4 py-6">
   <section id="authView" class="hidden card max-w-sm mx-auto mt-10 p-6 space-y-3">
     <h2 class="text-xl font-bold">Sign in to your family list</h2>
     <form id="authForm" class="space-y-3">
@@ -64,6 +67,14 @@
   </section>
 
   <section id="listView" class="hidden">
+    <div class="lg:flex lg:gap-6 lg:items-start">
+      <aside class="lg:w-64 lg:shrink-0 lg:sticky lg:top-24 mb-5 lg:mb-0">
+        <div class="card p-3">
+          <button id="famToggle" type="button" class="w-full flex items-center justify-between font-bold px-1" onclick="document.getElementById('famList').classList.toggle('hidden')">🎄 Family lists <span class="lg:hidden">▾</span></button>
+          <div id="famList" class="hidden lg:block mt-2 space-y-1"></div>
+        </div>
+      </aside>
+      <div class="flex-1 min-w-0">
     <div id="seasonBar" class="hidden text-center font-semibold mb-4"></div>
     <div class="flex flex-wrap items-center gap-3 mb-5">
       <h2 id="listTitle" class="text-3xl sm:text-4xl font-bold flex-1"></h2>
@@ -99,6 +110,8 @@
       </details>
     </div>
     <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -178,7 +191,7 @@ function toast(msg) {
 }
 function show(view) {
   for (const v of ['authView', 'listView']) $('#' + v).classList.toggle('hidden', v !== view);
-  for (const v of ['#who', '#fam']) $(v).classList.toggle('hidden', view === 'authView');
+  $('#who').classList.toggle('hidden', view === 'authView');
 }
 const av = (p, c = 'w-9 h-9') => safe(p.avatar)
   ? `<img src="${esc(p.avatar)}" alt="" class="${c} rounded-full object-cover">`
@@ -339,7 +352,6 @@ window.onhashchange = () => me && route();
 async function route() {
   const n = ++routeN;
   const p = fam.find(x => x.id === new URLSearchParams(location.hash.slice(1)).get('u')) || me, mine = p.id === uid;
-  $('#fam').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="chip ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}${f.id === uid ? 'My list' : esc(f.name)}</a>`).join('');
   $('#listTitle').textContent = mine ? 'My wish list' : `${p.name}'s wish list`;
   $('#addBtn').classList.toggle('hidden', !mine);
   $('#bmBar').classList.toggle('hidden', !mine);
@@ -350,6 +362,11 @@ async function route() {
   if (n !== routeN) return; // a newer route() won
   if (error) return toast(error.message);
   items = data;
+  const {data: allItems} = await sb.from('items').select('owner');
+  if (n !== routeN) return;
+  const counts = {};
+  for (const r of allItems || []) counts[r.owner] = (counts[r.owner] || 0) + 1;
+  $('#famList').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="famlink ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}<span>${f.id === uid ? 'My list' : esc(f.name)}</span><span class="cnt">${counts[f.id] || 0} wish${counts[f.id] === 1 ? '' : 'es'}</span></a>`).join('');
   $('#grid').innerHTML = items.map((i, ix) => card(i, mine, ix)).join('') ||
     `<p class="col-span-full text-center py-16 text-lg opacity-70">${mine ? 'Your list is empty. Add your first wish! ✨' : 'Nothing here yet 🎁'}</p>`;
 }
