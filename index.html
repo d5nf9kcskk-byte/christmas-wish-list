@@ -61,21 +61,49 @@
   #toast{max-width:92vw;text-align:center}
   #snowCv{position:fixed;inset:0;pointer-events:none;z-index:5}
   .wiggle{animation:wig .5s ease} @keyframes wig{25%{transform:rotate(-6deg) scale(1.12)}75%{transform:rotate(6deg) scale(1.12)}}
+  :root{--acc:#c0392b;--acc2:#1f6f4a;--hdr1:#14532d;--hdr2:#1c6b41}
+  body[data-skin="mint"]{--acc:#0e9594;--acc2:#5aa469;--hdr1:#0b5563;--hdr2:#12836f}
+  body[data-skin="plum"]{--acc:#8e44ad;--acc2:#b03a6b;--hdr1:#4a235a;--hdr2:#7d3c98}
+  body[data-skin="midnight"]{--acc:#2c4a7c;--acc2:#3e7cb1;--hdr1:#0d2137;--hdr2:#1d4e89}
+  .btn.red{background:var(--acc)} .btn.green{background:var(--acc2)} .chip.on{background:var(--acc)} .famlink.on{background:var(--acc)}
+  .claimbar{background-color:var(--acc2);background-image:linear-gradient(45deg,#ffffff2b 25%,transparent 25%,transparent 50%,#ffffff2b 50%)}
+  .stk{font-size:.8rem;opacity:.85;white-space:nowrap}
+  .ornw{position:relative;display:inline-grid;place-items:center;border-radius:9999px;flex:none;box-shadow:0 0 0 2px #f4c430,0 2px 6px #3b1d1433}
+  .ornw::before{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:11px;height:7px;border-radius:2px;background:linear-gradient(#f7d774,#d9a41c);z-index:1}
+  .ornw>*{width:100%;height:100%;border-radius:9999px}
+  #lights.chase .bulb{animation:chaseA .9s ease-in-out}
+  @keyframes chaseA{0%,100%{opacity:.25}50%{opacity:1;filter:brightness(1.7)}}
+  body.night{background:linear-gradient(180deg,#1b2a4a,#14213d 55%,#0d1b30);color:#f3e9d2}
+  body.night .card{color:#3b1d14}
+  body.night #seasonBar{color:#7ee2a8 !important}
+  body.night .bulb{filter:brightness(1.35)}
+  #fireFx{position:fixed;left:0;right:0;bottom:0;height:120px;pointer-events:none;z-index:4;background:radial-gradient(60% 100% at 50% 110%,#ff9d3c66,transparent 70%);opacity:0;transition:opacity .8s}
+  body.fire #fireFx{opacity:1;animation:flick 1.6s ease-in-out infinite alternate}
+  @keyframes flick{from{filter:brightness(.9)}to{filter:brightness(1.25)}}
+  #frost{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:1;transition:opacity 2.8s ease;background:radial-gradient(120% 120% at 50% 45%,transparent 55%,#ffffff59 82%,#eaf6ffcc 100%)}
+  .advdoor{aspect-ratio:1;border-radius:.9rem;font-weight:700;display:grid;place-items:center;cursor:pointer;transition:transform .2s,box-shadow .2s;border:2px solid #f4c43066;font-size:1.05rem}
+  .advdoor:hover{transform:translateY(-2px)}
+  .advdoor.locked{opacity:.45;cursor:not-allowed}
+  .advdoor.opened{background:#fff !important;color:#c0392b !important}
+  @media print{header,footer,#treeTx,#snowCv,#fireFx,.noprint{display:none !important}}
 </style>
 </head>
 <body class="min-h-screen">
 
-<header class="sticky top-0 z-10 bg-gradient-to-r from-[#14532d] via-[#1c6b41] to-[#14532d] shadow-lg">
+<header class="sticky top-0 z-10 shadow-lg" style="background:linear-gradient(90deg,var(--hdr1),var(--hdr2),var(--hdr1))">
   <div class="max-w-7xl mx-auto px-4 pt-3 pb-1 flex items-center gap-2">
     <h1 id="logoTitle" class="font-xmas text-3xl sm:text-4xl text-white tracking-wide flex-1 cursor-pointer select-none">🎄 Christmas Wish List</h1>
     <div id="who" class="hidden flex items-center gap-2">
       <button id="snowBtn" class="btn ghost text-sm" title="Toggle snowfall">❄️</button>
+      <button id="fireBtn" class="btn ghost text-sm" title="Fireplace mode">🔥</button>
+      <button id="stashBtn" class="btn ghost text-sm" title="My secret stash: everything I have claimed">🧺 Stash</button>
       <button id="invite" class="btn ghost text-sm">Invite</button>
       <button id="meAv" onclick="editProfile()" aria-label="Edit profile" class="rounded-full ring-2 ring-amber-300"></button>
       <button id="logout" class="btn ghost text-sm">Sign out</button>
     </div>
   </div>
-  <div id="lights" class="flex justify-center gap-2 sm:gap-3 px-2 pb-2 overflow-hidden" aria-hidden="true"></div>
+  <div id="lights" class="flex justify-center gap-2 sm:gap-3 px-2 overflow-hidden" aria-hidden="true"></div>
+  <div id="npLine" class="text-center text-[11px] leading-tight text-white/75 pb-1.5 px-2"></div>
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-6">
@@ -100,6 +128,28 @@
         </div>
       </aside>
       <div class="flex-1 min-w-0">
+    <div id="famTree" class="card reveal rv-t p-4 mb-5 hidden">
+      <div class="flex items-center gap-4 flex-wrap">
+        <svg viewBox="0 0 200 190" class="w-28 h-auto flex-none" role="img" aria-label="The family Christmas tree">
+          <rect x="92" y="158" width="16" height="20" rx="2" fill="#8b5a2b"/>
+          <path d="M100 78 L150 140 L50 140 Z" fill="#16a34a"/>
+          <path d="M100 46 L134 100 L66 100 Z" fill="#22a355"/>
+          <path d="M100 16 L122 58 L78 58 Z" fill="#1f8a4c"/>
+          <polygon points="100,0 102.6,7 110,7.4 104.4,12 106.2,19.2 100,15.4 93.8,19.2 95.6,12 90,7.4 97.4,7" fill="#f4c430"/>
+          <ellipse cx="100" cy="174" rx="58" ry="8" fill="#ffffff" opacity=".92"/>
+          <g id="famOrns"></g>
+        </svg>
+        <div class="flex-1 min-w-[12rem]">
+          <h3 class="font-xmas text-3xl">The family tree</h3>
+          <p id="famTreeTxt" class="opacity-80"></p>
+          <p class="text-sm opacity-60 mt-1">Every claimed gift hangs another ornament. Nobody can tell which ones are theirs.</p>
+        </div>
+      </div>
+    </div>
+    <div id="thanksCard" class="card reveal rv-t p-4 mb-5 hidden">
+      <h3 class="font-xmas text-3xl mb-1">💌 After Christmas: the great unmasking</h3>
+      <div id="thanksBody" class="space-y-2 text-sm"></div>
+    </div>
     <div id="seasonBar" class="hidden text-center font-semibold mb-4"></div>
     <div class="flex flex-wrap items-center gap-3 mb-5">
       <h2 id="listTitle" class="font-xmas text-4xl sm:text-5xl flex-1"></h2>
@@ -135,9 +185,27 @@
         <p class="mt-1">The bookmarklet cannot run inside an app. In the Etsy app, tap Share and Copy Link, then paste the link into the add form here. The name and store fill in; for the photo, open the same link in your phone browser, long-press the photo, open it in a new tab, and copy that address into Image URL.</p>
       </details>
     </div>
+    <div id="advBar" class="card reveal rv-t p-4 mb-5 hidden">
+      <div class="flex items-baseline gap-3 flex-wrap">
+        <h3 class="font-xmas text-3xl">🎄 Advent calendar</h3>
+        <p id="advNote" class="text-sm opacity-70"></p>
+      </div>
+      <div id="advGrid" class="grid grid-cols-5 gap-2 mt-3"></div>
+    </div>
     <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
       </div>
     </div>
+  </section>
+
+  <section id="stashView" class="hidden">
+    <div class="flex flex-wrap items-center gap-3 mb-5">
+      <h2 class="font-xmas text-4xl sm:text-5xl flex-1">🧺 My secret stash</h2>
+      <button class="btn ghost noprint" onclick="window.print()">🖨 Print list</button>
+      <button class="btn red noprint" onclick="show('listView')">← Back to lists</button>
+    </div>
+    <p class="text-sm opacity-70 mb-4">Everything you have claimed, in one place. Only you can see this page.</p>
+    <p id="stashTotals" class="mb-4 font-semibold"></p>
+    <div id="stashList" class="space-y-3"></div>
   </section>
   <footer class="reveal rv-t text-center text-sm opacity-60 pb-10 pt-4">Made with ❤️ for the family · 🎄 Merry Christmas 🎁</footer>
 </main>
@@ -176,6 +244,15 @@
     <label class="btn green text-sm cursor-pointer flex-1 text-center">📸 Upload your photo<input id="avatarFile" type="file" accept="image/*" class="hidden"></label>
   </div>
   <input name="avatar" type="url" placeholder="…or paste a photo link instead" aria-label="Avatar URL" class="inp">
+  <div>
+    <p class="text-sm font-semibold mb-1">Site theme 🎨</p>
+    <div class="grid grid-cols-4 gap-2">
+      <button type="button" class="btn ghost text-xs" onclick="setSkin('classic')">❤️ Classic</button>
+      <button type="button" class="btn ghost text-xs" onclick="setSkin('mint')">🌿 Mint</button>
+      <button type="button" class="btn ghost text-xs" onclick="setSkin('plum')">🍇 Plum</button>
+      <button type="button" class="btn ghost text-xs" onclick="setSkin('midnight')">🌌 Night</button>
+    </div>
+  </div>
   <button class="btn red w-full">Save</button>
 </form></dialog>
 
@@ -184,6 +261,23 @@
   <div id="shareLinks" class="grid grid-cols-2 gap-2"></div>
   <button class="btn ghost w-full" onclick="shareDlg.close()">Close</button>
 </div></dialog>
+
+<dialog id="thanksDlg"><form id="thanksForm" class="p-6 space-y-3">
+  <h3 class="font-xmas text-3xl">Send thanks 💌</h3>
+  <p id="thanksFor" class="text-sm opacity-80"></p>
+  <textarea name="message" required maxlength="500" rows="3" class="inp" placeholder="Thank you for…"></textarea>
+  <input type="hidden" name="claim">
+  <button class="btn red w-full">Send</button>
+</form></dialog>
+
+<dialog id="advDlg"><div class="p-6 space-y-3 text-center">
+  <h3 id="advTitle" class="font-xmas text-3xl"></h3>
+  <div id="advBody" class="space-y-2"></div>
+  <button class="btn red w-full" onclick="advDlg.close()">Close</button>
+</div></dialog>
+
+<div id="fireFx" aria-hidden="true"></div>
+<div id="frost" class="hidden" aria-hidden="true"></div>
 
 <div id="toast" role="status" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#3b1d14] text-white px-5 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50"></div>
 
@@ -221,6 +315,11 @@ const FAMILY = 'f1111111-1111-1111-1111-111111111111'; // one single family for 
 const DESIRE = ['', 'Nice to have', 'Would like', 'Really want', 'Love it!', 'Dream gift'];
 let uid = undefined, me = null, fam = [], items = [], shareUrl = '', routeN = 0;
 
+// Site theme skins (idea 9): classic, mint, plum, midnight. Saved per person.
+const SKINS = ['classic', 'mint', 'plum', 'midnight'];
+function setSkin(s) { if (!SKINS.includes(s)) s = 'classic'; document.body.dataset.skin = s; localStorage.skin = s; }
+setSkin(localStorage.skin || 'classic');
+
 // Twinkling Christmas lights strung under the header.
 const LCOLORS = ['#ef4444', '#f4c430', '#22c55e', '#60a5fa', '#ec4899'];
 $('#lights').innerHTML = Array.from({length: 30}, (_, i) => {
@@ -252,7 +351,7 @@ function toast(msg) {
 }
 function show(view) {
   const fromAuth = view === 'listView' && !$('#authView').classList.contains('hidden');
-  for (const v of ['authView', 'listView']) $('#' + v).classList.toggle('hidden', v !== view);
+  for (const v of ['authView', 'listView', 'stashView']) $('#' + v).classList.toggle('hidden', v !== view);
   $('#who').classList.toggle('hidden', view === 'authView');
   if (fromAuth) treeTransition();
 }
@@ -283,9 +382,9 @@ function treeTransition() {
   setTimeout(() => tx.classList.add('tx-hide'), 1300);
   setTimeout(() => { tx.classList.add('hidden'); tx.classList.remove('grid', 'tx-hide', 'play'); txBusy = false; }, 1700);
 }
-const av = (p, c = 'w-9 h-9') => safe(p.avatar)
-  ? `<img src="${esc(p.avatar)}" alt="" class="${c} rounded-full object-cover">`
-  : `<span class="${c} rounded-full bg-red-100 text-[#c0392b] grid place-items-center font-bold">${esc((p.name || '?')[0].toUpperCase())}</span>`;
+const av = (p, c = 'w-9 h-9') => `<span class="ornw ${c}">${safe(p.avatar)
+  ? `<img src="${esc(p.avatar)}" alt="" class="object-cover">`
+  : `<span class="bg-red-100 text-[#c0392b] grid place-items-center font-bold">${esc((p.name || '?')[0].toUpperCase())}</span>`}</span>`;
 
 const snow = () => confetti({particleCount: 70, spread: 100, startVelocity: 25, gravity: .5, ticks: 100, scalar: .9,
   colors: ['#ffffff', '#dbeafe', '#fde68a'], shapes: ['circle'], origin: {y: .35}, disableForReducedMotion: true});
@@ -312,6 +411,7 @@ function toggleSnow(on = !snowing) {
   flakes = Array.from({length: Math.min(90, Math.max(30, innerWidth / 14))}, () => ({
     x: Math.random() * cv.width, y: Math.random() * cv.height, r: 1 + Math.random() * 2.2,
     s: .4 + Math.random() * 1.1, p: Math.random() * 6.28, c: COLORS[Math.floor(Math.random() * COLORS.length)]}));
+  let drift = 0;
   const tick = () => {
     if (!snowing) return;
     sctx.clearRect(0, 0, cv.width, cv.height);
@@ -320,11 +420,21 @@ function toggleSnow(on = !snowing) {
       if (f.y > cv.height + 4) { f.y = -4; f.x = Math.random() * cv.width; }
       sctx.fillStyle = f.c; sctx.beginPath(); sctx.arc(f.x, f.y, f.r, 0, 6.29); sctx.fill();
     }
+    // Snow piles up along the bottom (idea 4).
+    drift = Math.min(22, drift + .012);
+    sctx.fillStyle = '#ffffff';
+    sctx.beginPath(); sctx.moveTo(0, cv.height);
+    for (let x = 0; x <= cv.width; x += 24) sctx.lineTo(x, cv.height - drift + Math.sin(x * .02 + 1.7) * 3);
+    sctx.lineTo(cv.width, cv.height); sctx.closePath(); sctx.fill();
     sraf = requestAnimationFrame(tick);
   };
   tick();
 }
 $('#snowBtn').onclick = () => toggleSnow();
+$('#fireBtn').onclick = () => {
+  document.body.classList.toggle('fire');
+  localStorage.fire = document.body.classList.contains('fire') ? 'on' : 'off';
+};
 
 function season() {
   const now = new Date(), bar = $('#seasonBar');
@@ -440,6 +550,28 @@ async function start() {
   show('listView'); route(); checkPrefill(); season();
   if (localStorage.snow !== 'off'
       && !matchMedia('(prefers-reduced-motion: reduce)').matches) toggleSnow(true);
+  // North Pole weather line (idea 10): deterministic per day.
+  const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
+  const COND = ['light snow', 'heavy snow', 'blizzarding', 'crisp and clear', 'aurora overhead', 'foggy, Rudolph on duty'];
+  const RST = ['grounded until the 24th', 'doing practice laps', 'warming up', 'on a cookie break'];
+  $('#npLine').textContent = `North Pole: ${-4 - (doy * 7) % 18}°, ${COND[doy % COND.length]} · reindeer ${RST[doy % RST.length]}`;
+  // Day and night (idea 5): evenings go cozy-dark and the lights glow harder.
+  const hr = new Date().getHours();
+  document.body.classList.toggle('night', hr >= 18 || hr < 6);
+  if (localStorage.fire === 'on') document.body.classList.add('fire');
+  // Window frost on first load of the session (idea 7).
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!sessionStorage.frosted && !reduced) {
+    sessionStorage.frosted = '1';
+    const fr = $('#frost'); fr.classList.remove('hidden');
+    setTimeout(() => { fr.style.opacity = '0'; setTimeout(() => fr.remove(), 3000); }, 600);
+  }
+  // House lights chase sequence every few seconds (idea 3).
+  if (!reduced) setInterval(() => {
+    const L = $('#lights');
+    L.classList.remove('chase'); void L.offsetWidth; L.classList.add('chase');
+    setTimeout(() => L.classList.remove('chase'), 1100);
+  }, 7000);
 }
 
 function checkPrefill() {
@@ -473,6 +605,135 @@ $('#pickBtn').onclick = () => {
   snow();
 };
 
+// ---------- idea 1: the family tree decorates itself ----------
+// Claims on your own items come back empty under RLS, so this total can
+// never leak what was claimed for you. It counts everyone else's lists.
+async function renderTree() {
+  const {data} = await sb.from('items').select('claims(qty)');
+  const total = (data || []).reduce((s, i) => s + i.claims.reduce((a, c) => a + c.qty, 0), 0);
+  $('#famTree').classList.remove('hidden');
+  $('#famTreeTxt').textContent = total
+    ? `${total} gift${total === 1 ? '' : 's'} claimed across the family. The tree is filling up!`
+    : 'No ornaments yet. The first claim hangs the first one.';
+  const PTS = [[100,52],[88,66],[112,68],[78,84],[100,88],[122,86],[70,104],[92,106],[114,104],[134,106],[84,124],[106,126],[128,124],[62,128],[146,130],[96,142],[120,144],[76,146],[140,148],[108,158]];
+  const cols = ['#ef4444', '#f4c430', '#f9a8d4', '#60a5fa', '#a78bfa'];
+  $('#famOrns').innerHTML = PTS.slice(0, Math.min(total, PTS.length))
+    .map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${cols[i % cols.length]}" stroke="#ffffff88"/>`).join('');
+}
+
+// ---------- idea 19: advent calendar ----------
+const JOKES = [
+  'Why did Santa go to music school? So he could wrap better! 🎤',
+  'What do elves learn in school? The elf-abet! 🔤',
+  'What does Santa suffer from if he gets stuck in a chimney? Claus-trophobia! 😅',
+  'What do you call an obnoxious reindeer? Rude-olph! 🦌',
+  'Why did the Christmas tree go to the barber? It needed a trim! ✂️',
+  'What falls at the North Pole but never gets hurt? Snow! ❄️',
+  "What do Santa's helpers call their boss at the beach? Sandy Claus! 🏖️",
+  'Why did the turkey join the band? It had the drumsticks! 🥁',
+  "What kind of ball doesn't bounce? A snowball! ☃️",
+  'What do you get when you cross a snowman with a vampire? Frostbite! 🧛',
+  "What is Santa's favorite candy? Jolly Ranchers! 🍬",
+  'How does a snowman get around? By icicle! 🚲'
+];
+function advContent(d) {
+  if (d % 3 === 1) return {t: `December ${d}`, h: `<p class="text-lg">${JOKES[d % JOKES.length]}</p>`};
+  if (d % 3 === 2) {
+    const f = fam[d % fam.length];
+    return {t: `December ${d}: family spotlight`, h: `<div class="flex justify-center">${av(f, 'w-20 h-20')}</div><p class="text-lg font-semibold mt-1">${esc(f.name)}</p><p class="opacity-75">Say something nice to ${esc(f.name.split(' ')[0])} today.</p>`};
+  }
+  const pool = items.filter(i => safe(i.image));
+  if (pool.length) {
+    const it = pool[d % pool.length];
+    return {t: `December ${d}`, h: `<img src="${esc(it.image)}" class="w-40 h-40 object-cover rounded-2xl mx-auto" alt=""><p class="opacity-75">Spotted on a family wish list…</p>`};
+  }
+  return {t: `December ${d}`, h: `<p class="text-lg">${JOKES[(d + 3) % JOKES.length]}</p>`};
+}
+function renderAdv() {
+  const now = new Date(), dec = now.getMonth() === 11, day = now.getDate();
+  $('#advBar').classList.remove('hidden');
+  $('#advNote').textContent = dec ? 'A door a day. No peeking ahead!' : 'Doors unlock starting December 1.';
+  let opened = [];
+  try { opened = JSON.parse(localStorage.adv || '[]'); } catch {}
+  $('#advGrid').innerHTML = Array.from({length: 25}, (_, i) => {
+    const d = i + 1, unlocked = dec && day >= d, isOpen = opened.includes(d);
+    return `<button class="advdoor ${isOpen ? 'opened' : ''} ${unlocked ? '' : 'locked'}" style="background:${d % 2 ? '#c0392b' : '#1f6f4a'};color:#fff" onclick="openAdv(${d})">${isOpen ? '🎁' : d}</button>`;
+  }).join('');
+}
+const openAdv = d => {
+  const now = new Date();
+  if (now.getMonth() !== 11 || now.getDate() < d) return toast(`That door opens on December ${d} 🎄`);
+  let opened = [];
+  try { opened = JSON.parse(localStorage.adv || '[]'); } catch {}
+  if (!opened.includes(d)) { opened.push(d); localStorage.adv = JSON.stringify(opened); }
+  const c = advContent(d);
+  $('#advTitle').textContent = c.t; $('#advBody').innerHTML = c.h;
+  $('#advDlg').showModal();
+  if (d === 25) gifts(); else snow();
+  renderAdv();
+};
+
+// ---------- idea 39: thank-you notes (reveal window Dec 26 to Jan 7) ----------
+let receivedGifts = [];
+async function renderThanks() {
+  const now = new Date(), m = now.getMonth(), d = now.getDate();
+  const inWin = (m === 11 && d >= 26) || (m === 0 && d <= 7);
+  let html = '';
+  if (inWin) {
+    const {data} = await sb.rpc('my_received_gifts');
+    receivedGifts = data || [];
+    if (receivedGifts.length) html += '<p class="font-semibold mb-1">🎁 What you received, and who gave it:</p>' + receivedGifts.map(g =>
+      `<div class="flex items-center gap-2 flex-wrap"><span class="flex-1"><strong>${esc(g.item_name)}</strong> from ${esc(g.giver_name)}</span>${
+        g.thanked ? '<span class="chip">💌 Thanks sent</span>' : `<button class="btn green text-sm" onclick="openThanks(${g.claim_id})">Send thanks</button>`}</div>`).join('');
+  }
+  const {data: got} = await sb.from('thanks').select('*').eq('to_user', uid).order('created_at', {ascending: false});
+  if (got?.length) html += '<p class="font-semibold mt-3 mb-1">💌 Thanks sent to you:</p>' + got.map(t => {
+    const f = fam.find(x => x.id === t.from_user);
+    return `<p><strong>${esc(f?.name || 'Someone')}</strong>: ${esc(t.message)}</p>`;
+  }).join('');
+  $('#thanksCard').classList.toggle('hidden', !html);
+  $('#thanksBody').innerHTML = html;
+}
+const openThanks = claimId => {
+  const g = receivedGifts.find(x => x.claim_id === claimId);
+  if (!g) return;
+  $('#thanksForm').elements.claim.value = claimId;
+  $('#thanksFor').textContent = `For ${g.item_name}, from ${g.giver_name}`;
+  $('#thanksDlg').showModal();
+};
+$('#thanksForm').onsubmit = async e => {
+  e.preventDefault();
+  const E = e.target.elements;
+  const {error} = await sb.rpc('send_thanks', {p_claim_id: +E.claim.value, p_message: E.message.value.trim()});
+  if (error) return toast(error.message);
+  $('#thanksDlg').close(); toast('Thanks sent 💌'); gifts(); renderThanks();
+};
+
+// ---------- idea 29: my secret stash ----------
+async function openStash() {
+  show('stashView');
+  const {data, error} = await sb.from('claims').select('*, items(*)').eq('user_id', uid).order('created_at', {ascending: false});
+  if (error) return toast(error.message);
+  const rows = data || [];
+  const spent = rows.filter(c => c.bought).reduce((s, c) => s + (c.items?.price || 0) * c.qty, 0);
+  const promised = rows.reduce((s, c) => s + (c.items?.price || 0) * c.qty, 0);
+  $('#stashTotals').textContent = rows.length
+    ? `${rows.length} claim${rows.length === 1 ? '' : 's'} · about $${promised.toFixed(2)} promised · $${spent.toFixed(2)} already bought` : '';
+  $('#stashList').innerHTML = rows.map(c => {
+    const it = c.items || {}, owner = fam.find(f => f.id === it.owner);
+    return `<div class="card p-3 flex items-center gap-3">
+      ${safe(it.image) ? `<img src="${esc(it.image)}" class="w-14 h-14 rounded-xl object-cover flex-none" alt="">` : '<span class="text-3xl w-14 text-center flex-none">🎁</span>'}
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold truncate">${esc(it.name || 'Wish')}</p>
+        <p class="text-sm opacity-70">for ${esc(owner?.name || '…')}${it.price ? ` · $${Number(it.price).toFixed(2)}` : ''} · qty ${c.qty}${it.url && safe(it.url) ? ` · <a class="underline" target="_blank" rel="noopener" href="${esc(it.url)}">store page</a>` : ''}</p>
+      </div>
+      ${c.bought ? '<span class="chip bought">✓ Bought</span>' : `<button class="btn green text-sm noprint" onclick="markBought(${c.id}).then(openStash)">Mark bought</button>`}
+      <button class="btn ghost text-sm noprint" onclick="unclaim(${c.id}).then(openStash)">Unclaim</button>
+    </div>`;
+  }).join('') || '<p class="text-center py-10 opacity-70">Nothing claimed yet. Your stash is empty. 🧺</p>';
+}
+$('#stashBtn').onclick = openStash;
+
 async function route() {
   const n = ++routeN;
   const p = fam.find(x => x.id === new URLSearchParams(location.hash.slice(1)).get('u')) || me, mine = p.id === uid;
@@ -491,12 +752,18 @@ async function route() {
   if (n !== routeN) return;
   const counts = {};
   for (const r of allItems || []) counts[r.owner] = (counts[r.owner] || 0) + 1;
-  $('#famList').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="famlink ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}<span>${f.id === uid ? 'My list' : esc(f.name)}</span><span class="cnt">${counts[f.id] || 0} wish${counts[f.id] === 1 ? '' : 'es'}</span></a>`).join('');
+  // Stockings (idea 2): how many gifts each person has claimed for others.
+  const {data: allClaims} = await sb.from('claims').select('user_id, qty');
+  if (n !== routeN) return;
+  const gave = {};
+  for (const c of allClaims || []) gave[c.user_id] = (gave[c.user_id] || 0) + c.qty;
+  $('#famList').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="famlink ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}<span>${f.id === uid ? 'My list' : esc(f.name)}</span><span class="stk" title="Gifts claimed for others">🧦 ${gave[f.id] || 0}</span><span class="cnt">${counts[f.id] || 0} wish${counts[f.id] === 1 ? '' : 'es'}</span></a>`).join('');
   $('#grid').innerHTML = items.map((i, ix) => card(i, mine, ix)).join('') ||
     `<div class="col-span-full text-center py-16 space-y-3"><div class="text-6xl animate-bounce">${mine ? '🎁' : '🎄'}</div><p class="text-lg opacity-70">${mine ? 'Your list is empty. Add your first wish! ✨' : 'Nothing here yet. Check back soon!'}</p></div>`;
   watchReveals();
   if (shownOwner && shownOwner !== p.id) treeTransition();
   shownOwner = p.id;
+  renderTree(); renderAdv(); renderThanks();
 }
 
 function card(i, mine, ix = 0) {
