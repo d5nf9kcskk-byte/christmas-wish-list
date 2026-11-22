@@ -317,7 +317,8 @@ async function autofill() {
   toast('Looking up item…');
   try {
     let htmlText = '';
-    const routes = ['https://api.allorigins.win/raw?url=' + encodeURIComponent(u), 'https://api.codetabs.com/v1/proxy?quest=' + u];
+    // Etsy blocks every free fetcher (verified), so skip straight to the link-name fallback for it.
+    const routes = host === 'etsy.com' ? [] : ['https://api.allorigins.win/raw?url=' + encodeURIComponent(u), 'https://api.codetabs.com/v1/proxy?quest=' + u];
     for (const px of routes) {
       try { const r = await fetch(px, {signal: AbortSignal.timeout(9000)}); if (r.ok) { htmlText = await r.text(); if (htmlText.length > 500) break; } } catch {}
     }
