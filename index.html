@@ -20,7 +20,7 @@
   .inp:focus{outline:none;border-color:#c0392b}
   .card{background:#fff;border-radius:1.75rem;overflow:hidden;box-shadow:0 4px 14px #3b1d1412;transition:transform .25s,box-shadow .25s}
   .card:hover{transform:translateY(-4px);box-shadow:0 12px 28px #3b1d141f}
-  .chip{display:flex;align-items:center;gap:.5rem;padding:.25rem .9rem .25rem .25rem;border-radius:9999px;background:#fff;white-space:nowrap;font-weight:500;transition:background .2s,color .2s}
+  .chip{display:flex;align-items:center;gap:.5rem;padding:.45rem 1rem .45rem .45rem;border-radius:9999px;background:#fff;white-space:nowrap;font-weight:500;transition:background .2s,color .2s}
   .chip.on{background:#c0392b;color:#fff}
   dialog{border-radius:1.75rem;padding:0;width:min(32rem,94vw);max-height:90vh;color:inherit}
   dialog::backdrop{background:#3b1d1466;backdrop-filter:blur(3px)}
@@ -32,7 +32,7 @@
 
 <header class="sticky top-0 z-10 bg-[#fff7ed]/90 backdrop-blur border-b border-orange-100">
   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2">
-    <h1 class="text-xl sm:text-2xl font-bold text-[#c0392b] flex-1">🎄 Wish List</h1>
+    <h1 class="text-lg sm:text-xl font-bold text-[#c0392b] flex-1">🎄 Wish List</h1>
     <div id="who" class="hidden flex items-center gap-2">
       <button id="invite" class="btn ghost text-sm">Invite</button>
       <button id="meAv" onclick="editProfile()" aria-label="Edit profile" class="rounded-full"></button>
@@ -57,7 +57,7 @@
 
   <section id="listView" class="hidden">
     <div class="flex flex-wrap items-center gap-3 mb-5">
-      <h2 id="listTitle" class="text-2xl font-bold flex-1"></h2>
+      <h2 id="listTitle" class="text-3xl sm:text-4xl font-bold flex-1"></h2>
       <button id="shareList" class="btn ghost">Share</button>
       <button id="addBtn" class="btn red">+ Add wish</button>
     </div>
@@ -226,7 +226,7 @@ function card(i, mine) {
     ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover">`
     : '<span class="text-7xl">🎁</span>';
   const sm = 'btn text-sm';
-  return `<article class="card fade flex flex-col ${!mine && left <= 0 ? 'ring-4 ring-green-700/30' : ''}">
+  return `<article class="card fade flex flex-col ${!mine && left <= 0 ? 'ring-2 ring-green-700/40' : ''}">
     <div class="aspect-square bg-red-50 grid place-items-center overflow-hidden">${img}</div>
     <div class="p-4 flex flex-col gap-2 flex-1">
       <div class="flex items-start gap-2">
@@ -249,8 +249,12 @@ function card(i, mine) {
 function claimBox(i, got, left) {
   const my = i.claims.find(c => c.user_id === uid), sm = 'btn text-sm';
   return `<div class="border-t border-orange-100 pt-3 mt-1 space-y-2">
+    <div class="h-2 rounded-full bg-orange-100 overflow-hidden"><div class="h-full bg-[#1f6f4a] rounded-full transition-all duration-500" style="width:${Math.round(got / i.qty * 100)}%"></div></div>
     <div class="text-sm font-semibold ${left <= 0 ? 'text-[#1f6f4a]' : ''}">${left <= 0 ? '🎉 Fully claimed' : `${got} of ${i.qty} claimed`}</div>
-    ${my ? `<div class="flex flex-wrap items-center gap-2 text-sm">You claimed ${my.qty}${my.bought ? ' · bought ✅' : ''}
+    ${my ? `<div class="flex flex-wrap items-center gap-2 text-sm">You claimed
+        <select id="cq${my.id}" aria-label="Your claimed quantity" class="inp !w-auto text-sm">${Array.from({length: my.qty + left}, (_, k) => `<option ${k + 1 === my.qty ? 'selected' : ''}>${k + 1}</option>`).join('')}</select>
+        ${my.bought ? '· bought ✅' : ''}
+        <button onclick="updateClaimQty(${my.id})" class="${sm} ghost">Update</button>
         ${my.bought ? '' : `<button onclick="markBought(${my.id})" class="${sm} green">Mark bought</button>`}
         <button onclick="unclaim(${my.id})" class="${sm} ghost">Unclaim</button></div>`
     : left > 0 ? `<div class="flex flex-wrap gap-2">
@@ -268,6 +272,7 @@ async function run(q, then) {
 }
 const claim = (id, bought = false) => run(sb.from('claims').insert({item_id: id, qty: +$('#q' + id).value, bought}), bought ? gifts : snow);
 const markBought = id => run(sb.from('claims').update({bought: true}).eq('id', id), gifts);
+const updateClaimQty = id => run(sb.from('claims').update({qty: +$('#cq' + id).value}).eq('id', id));
 const unclaim = id => run(sb.from('claims').delete().eq('id', id));
 const delItem = id => confirm('Delete this wish?') && run(sb.from('items').delete().eq('id', id));
 
@@ -300,9 +305,28 @@ async function autofill() {
     const host = new URL(u).hostname.replace(/^www\./, '');
     E.store.value ||= host;
     toast('Looking up item…');
-    const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(u), {signal: AbortSignal.timeout(8000)});
-    const d = new DOMParser().parseFromString(await r.text(), 'text/html');
+    let htmlText = '';
+    for (const px of ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?url=']) {
+      try { const r = await fetch(px + encodeURIComponent(u), {signal: AbortSignal.timeout(8000)}); if (r.ok) { htmlText = await r.text(); break; } } catch {}
+    }
+    if (!htmlText) throw new Error('fetch failed');
+    const d = new DOMParser().parseFromString(htmlText, 'text/html');
     const m = k => d.querySelector(`meta[property="${k}"],meta[name="${k}"]`)?.content?.trim();
+    // JSON-LD product data first: many stores embed name, image and price here even when OG tags are thin.
+    try {
+      const flat = o => [o, ...(o?.['@graph'] || []), ...(Array.isArray(o) ? o : [])];
+      for (const s of d.querySelectorAll('script[type="application/ld+json"]')) {
+        const prod = flat(JSON.parse(s.textContent)).find(o => o && (o['@type'] === 'Product' || o.offers));
+        if (!prod) continue;
+        E.name.value ||= (prod.name || '').trim();
+        const pimg = Array.isArray(prod.image) ? prod.image[0] : prod.image;
+        if (pimg) E.image.value ||= new URL(pimg, u).href;
+        const off = Array.isArray(prod.offers) ? prod.offers[0] : prod.offers;
+        const lp = parseFloat(off?.price ?? off?.lowPrice);
+        if (lp) E.price.value ||= lp;
+        if (E.name.value) break;
+      }
+    } catch {}
     E.name.value ||= m('og:title') || d.title.trim();
     const img = m('og:image') || m('twitter:image');
     if (img) E.image.value ||= new URL(img, u).href;
