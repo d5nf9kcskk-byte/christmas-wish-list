@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Family Wish List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
+<style>
+  body{font-family:Fredoka,system-ui,sans-serif;background:#fff7ed;color:#3b1d14}
+  .btn{border-radius:9999px;padding:.55rem 1.1rem;font-weight:600;transition:transform .15s,background .2s,box-shadow .2s}
+  .btn:hover{transform:translateY(-1px)} .btn:active{transform:scale(.96)}
+  .red{background:#c0392b;color:#fff} .red:hover{background:#a93226}
+  .green{background:#1f6f4a;color:#fff} .green:hover{background:#185a3c}
+  .ghost{background:#fff;border:2px solid #f3d9c6} .ghost:hover{border-color:#c0392b}
+  .inp{width:100%;border:2px solid #f3d9c6;border-radius:1rem;padding:.6rem .9rem;background:#fff;transition:border-color .2s}
+  .inp:focus{outline:none;border-color:#c0392b}
+  .card{background:#fff;border-radius:1.75rem;overflow:hidden;box-shadow:0 4px 14px #3b1d1412;transition:transform .25s,box-shadow .25s}
+  .card:hover{transform:translateY(-4px);box-shadow:0 12px 28px #3b1d141f}
+  .chip{display:flex;align-items:center;gap:.5rem;padding:.25rem .9rem .25rem .25rem;border-radius:9999px;background:#fff;white-space:nowrap;font-weight:500;transition:background .2s,color .2s}
+  .chip.on{background:#c0392b;color:#fff}
+  dialog{border-radius:1.75rem;padding:0;width:min(32rem,94vw);max-height:90vh;color:inherit}
+  dialog::backdrop{background:#3b1d1466;backdrop-filter:blur(3px)}
+  dialog[open]{animation:pop .25s ease} @keyframes pop{from{transform:scale(.92);opacity:0}}
+  .fade{animation:fade .35s ease} @keyframes fade{from{opacity:0;transform:translateY(8px)}}
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="sticky top-0 z-10 bg-[#fff7ed]/90 backdrop-blur border-b border-orange-100">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2">
+    <h1 class="text-xl sm:text-2xl font-bold text-[#c0392b] flex-1">🎄 Wish List</h1>
+    <div id="who" class="hidden flex items-center gap-2">
+      <button id="invite" class="btn ghost text-sm">Invite</button>
+      <button id="meAv" onclick="editProfile()" aria-label="Edit profile" class="rounded-full"></button>
+      <button id="logout" class="btn ghost text-sm">Sign out</button>
+    </div>
+  </div>
+  <nav id="fam" class="hidden max-w-6xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto"></nav>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-6">
+  <section id="authView" class="hidden card max-w-sm mx-auto mt-10 p-6 space-y-3">
+    <h2 class="text-xl font-bold">Sign in to your family list</h2>
+    <form id="authForm" class="space-y-3">
+      <input id="email" type="email" required placeholder="Email" aria-label="Email" class="inp" autocomplete="email">
+      <input id="pw" type="password" required minlength="6" placeholder="Password" aria-label="Password" class="inp" autocomplete="current-password">
+      <div class="flex gap-2">
+        <button class="btn red flex-1">Sign in</button>
+        <button type="button" id="signup" class="btn ghost flex-1">Sign up</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="listView" class="hidden">
+    <div class="flex flex-wrap items-center gap-3 mb-5">
+      <h2 id="listTitle" class="text-2xl font-bold flex-1"></h2>
+      <button id="shareList" class="btn ghost">Share</button>
+      <button id="addBtn" class="btn red">+ Add wish</button>
+    </div>
+    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+  </section>
+</main>
+
+<dialog id="itemDlg"><form id="itemForm" class="p-6 space-y-3">
+  <h3 class="text-xl font-bold">Your wish ✨</h3>
+  <input name="url" type="url" placeholder="Paste store link to auto-fill" aria-label="Store link" class="inp">
+  <input name="name" required placeholder="What is it?" aria-label="Name" class="inp">
+  <input name="image" type="url" placeholder="Image URL" aria-label="Image URL" class="inp">
+  <div class="grid grid-cols-2 gap-3">
+    <input name="store" placeholder="Store" aria-label="Store" class="inp">
+    <input name="price" type="number" step="0.01" min="0" placeholder="Price" aria-label="Price" class="inp">
+    <label class="text-sm">Quantity<input name="qty" type="number" min="1" max="99" required class="inp"></label>
+    <label class="text-sm">How much?
+      <select name="desire" class="inp">
+        <option value="1">★ Nice to have</option>
+        <option value="2">★★ Would like</option>
+        <option value="3">★★★ Really want</option>
+        <option value="4">★★★★ Love it!</option>
+        <option value="5">★★★★★ Dream gift</option>
+      </select></label>
+  </div>
+  <textarea name="notes" rows="2" placeholder="Size, color, notes" aria-label="Notes" class="inp"></textarea>
+  <div class="flex gap-2 justify-end">
+    <button type="button" class="btn ghost" onclick="itemDlg.close()">Cancel</button>
+    <button class="btn red">Save</button>
+  </div>
+</form></dialog>
+
+<dialog id="profDlg"><form id="profForm" class="p-6 space-y-3">
+  <h3 class="text-xl font-bold">Your profile 🎅</h3>
+  <input name="name" required maxlength="60" placeholder="Your name" aria-label="Name" class="inp">
+  <input name="avatar" type="url" placeholder="Avatar image URL (optional)" aria-label="Avatar URL" class="inp">
+  <button class="btn red w-full">Save</button>
+</form></dialog>
+
+<dialog id="shareDlg"><div class="p-6 space-y-3">
+  <h3 class="text-xl font-bold">Share 🎁</h3>
+  <div id="shareLinks" class="grid grid-cols-2 gap-2"></div>
+  <button class="btn ghost w-full" onclick="shareDlg.close()">Close</button>
+</div></dialog>
+
+<div id="toast" role="status" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#3b1d14] text-white px-5 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50"></div>
+
+<script>
+const SUPABASE_URL = 'https://knxepbzsjzvcuplimjgv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_hd1yW5Gne9PKJzDXt2BEuQ_Pm_vi4ch';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+const safe = u => /^https?:\/\/./i.test(u || '') ? u : '';
+const BASE = location.origin + location.pathname;
+const DESIRE = ['', 'Nice to have', 'Would like', 'Really want', 'Love it!', 'Dream gift'];
+let uid = null, me = null, fam = [], items = [], shareUrl = '', routeN = 0;
+
+const joinId = new URLSearchParams(location.search).get('join');
+if (joinId) { localStorage.join = joinId; history.replaceState(null, '', BASE + location.hash); }
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.remove('opacity-0');
+  clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.add('opacity-0'), 2800);
+}
+function show(view) {
+  for (const v of ['authView', 'listView']) $('#' + v).classList.toggle('hidden', v !== view);
+  for (const v of ['#who', '#fam']) $(v).classList.toggle('hidden', view === 'authView');
+}
+const av = (p, c = 'w-9 h-9') => safe(p.avatar)
+  ? `<img src="${esc(p.avatar)}" alt="" class="${c} rounded-full object-cover">`
+  : `<span class="${c} rounded-full bg-red-100 text-[#c0392b] grid place-items-center font-bold">${esc((p.name || '?')[0].toUpperCase())}</span>`;
+
+const snow = () => confetti({particleCount: 70, spread: 100, startVelocity: 25, gravity: .5, ticks: 100, scalar: .9,
+  colors: ['#ffffff', '#dbeafe', '#fde68a'], shapes: ['circle'], origin: {y: .35}, disableForReducedMotion: true});
+function gifts() {
+  for (const x of [.2, .5, .8]) confetti({particleCount: 60, spread: 90, startVelocity: 45, ticks: 110, origin: {x, y: .6},
+    colors: ['#c0392b', '#1f6f4a', '#f4c430', '#ffffff'], disableForReducedMotion: true});
+  confetti({particleCount: 18, shapes: [confetti.shapeFromText({text: '🎁', scalar: 2})], scalar: 2, spread: 120,
+    ticks: 110, origin: {y: .5}, disableForReducedMotion: true});
+}
+
+// ---------- auth ----------
+const creds = () => ({email: $('#email').value.trim(), password: $('#pw').value});
+$('#authForm').onsubmit = async e => {
+  e.preventDefault();
+  const {error} = await sb.auth.signInWithPassword(creds());
+  if (error) toast(error.message);
+};
+$('#signup').onclick = async () => {
+  if (!$('#authForm').reportValidity()) return;
+  const {data, error} = await sb.auth.signUp({...creds(), options: {emailRedirectTo: BASE}});
+  toast(error ? error.message : data.session ? 'Welcome! 🎄' : 'Check your email to confirm, then sign in.');
+};
+$('#logout').onclick = () => sb.auth.signOut();
+
+sb.auth.onAuthStateChange((_e, s) => {
+  if ((s?.user.id ?? null) === uid) return; // ignore token refreshes
+  uid = s?.user.id ?? null;
+  setTimeout(boot); // don't call supabase inside this callback (deadlock)
+});
+
+async function boot() {
+  if (!uid) { me = null; return show('authView'); }
+  const {data, error} = await sb.from('profiles').select().eq('id', uid).maybeSingle();
+  if (error) return toast(error.message);
+  me = data;
+  if (!me) return editProfile();
+  const j = localStorage.join; delete localStorage.join;
+  if (j && j !== me.family_id && confirm('Join the family from your invite link? Your list comes with you.')) {
+    const {error} = await sb.from('profiles').update({family_id: j}).eq('id', uid);
+    if (error) toast(error.message); else me.family_id = j;
+  }
+  start();
+}
+
+// ---------- profile ----------
+function editProfile() {
+  const E = $('#profForm').elements;
+  E.name.value = me?.name || ''; E.avatar.value = me?.avatar || '';
+  $('#profDlg').showModal();
+}
+$('#profDlg').oncancel = e => me || e.preventDefault(); // new users must create a profile
+$('#profForm').onsubmit = async e => {
+  e.preventDefault();
+  const E = e.target.elements;
+  const row = {id: uid, name: E.name.value.trim(), avatar: E.avatar.value.trim() || null,
+    family_id: me?.family_id || localStorage.join || crypto.randomUUID()};
+  const {data, error} = await sb.from('profiles').upsert(row).select().single();
+  if (error) return toast(error.message);
+  delete localStorage.join; me = data;
+  $('#profDlg').close(); start();
+};
+
+// ---------- lists ----------
+async function start() {
+  const {data, error} = await sb.from('profiles').select().order('name');
+  if (error) return toast(error.message);
+  fam = [me, ...data.filter(p => p.id !== uid)];
+  $('#meAv').innerHTML = av(me);
+  show('listView'); route();
+}
+window.onhashchange = () => me && route();
+
+async function route() {
+  const n = ++routeN;
+  const p = fam.find(x => x.id === new URLSearchParams(location.hash.slice(1)).get('u')) || me, mine = p.id === uid;
+  $('#fam').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="chip ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}${f.id === uid ? 'My list' : esc(f.name)}</a>`).join('');
+  $('#listTitle').textContent = mine ? 'My wish list' : `${p.name}'s wish list`;
+  $('#addBtn').classList.toggle('hidden', !mine);
+  $('#shareList').onclick = () => share(`${p.name}'s Christmas wish list 🎄`, `${BASE}#u=${p.id}`);
+  // claims(*) comes back empty on your own items: RLS hides them from owners.
+  const {data, error} = await sb.from('items').select('*, claims(*)').eq('owner', p.id)
+    .order('desire', {ascending: false}).order('created_at');
+  if (n !== routeN) return; // a newer route() won
+  if (error) return toast(error.message);
+  items = data;
+  $('#grid').innerHTML = items.map(i => card(i, mine)).join('') ||
+    `<p class="col-span-full text-center py-16 text-lg opacity-70">${mine ? 'Your list is empty. Add your first wish! ✨' : 'Nothing here yet 🎁'}</p>`;
+}
+
+function card(i, mine) {
+  const got = i.claims.reduce((s, c) => s + c.qty, 0), left = i.qty - got;
+  const img = safe(i.image)
+    ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover">`
+    : '<span class="text-7xl">🎁</span>';
+  const sm = 'btn text-sm';
+  return `<article class="card fade flex flex-col ${!mine && left <= 0 ? 'ring-4 ring-green-700/30' : ''}">
+    <div class="aspect-square bg-red-50 grid place-items-center overflow-hidden">${img}</div>
+    <div class="p-4 flex flex-col gap-2 flex-1">
+      <div class="flex items-start gap-2">
+        <h3 class="text-lg font-semibold flex-1 leading-tight">${esc(i.name)}</h3>
+        ${i.price ? `<span class="font-bold text-[#1f6f4a]">$${(+i.price).toFixed(2)}</span>` : ''}
+      </div>
+      <div class="text-sm"><span class="text-amber-500">${'★'.repeat(i.desire)}${'☆'.repeat(5 - i.desire)}</span> ${DESIRE[i.desire]}</div>
+      <div class="text-sm opacity-70">${[esc(i.store), `wants ${i.qty}`].filter(Boolean).join(' · ')}</div>
+      ${i.notes ? `<p class="text-sm bg-orange-50 rounded-xl px-3 py-2">${esc(i.notes)}</p>` : ''}
+      <div class="flex flex-wrap gap-2 mt-auto pt-2">
+        ${safe(i.url) ? `<a href="${esc(i.url)}" target="_blank" rel="noopener" class="${sm} green">View / buy</a>` : ''}
+        <button onclick="shareItem(${i.id})" class="${sm} ghost">Share</button>
+        ${mine ? `<button onclick="openItem(${i.id})" class="${sm} ghost">Edit</button>
+                  <button onclick="delItem(${i.id})" class="${sm} ghost">Delete</button>` : ''}
+      </div>
+      ${mine ? '' : claimBox(i, got, left)}
+    </div></article>`;
+}
+
+function claimBox(i, got, left) {
+  const my = i.claims.find(c => c.user_id === uid), sm = 'btn text-sm';
+  return `<div class="border-t border-orange-100 pt-3 mt-1 space-y-2">
+    <div class="text-sm font-semibold ${left <= 0 ? 'text-[#1f6f4a]' : ''}">${left <= 0 ? '🎉 Fully claimed' : `${got} of ${i.qty} claimed`}</div>
+    ${my ? `<div class="flex flex-wrap items-center gap-2 text-sm">You claimed ${my.qty}${my.bought ? ' · bought ✅' : ''}
+        ${my.bought ? '' : `<button onclick="markBought(${my.id})" class="${sm} green">Mark bought</button>`}
+        <button onclick="unclaim(${my.id})" class="${sm} ghost">Unclaim</button></div>`
+    : left > 0 ? `<div class="flex flex-wrap gap-2">
+        <select id="q${i.id}" aria-label="Quantity to claim" class="inp !w-auto text-sm">${Array.from({length: left}, (_, k) => `<option>${k + 1}</option>`).join('')}</select>
+        <button onclick="claim(${i.id})" class="${sm} red">Claim</button>
+        <button onclick="claim(${i.id}, true)" class="${sm} green">Bought it</button></div>` : ''}
+  </div>`;
+}
+
+// ---------- actions ----------
+async function run(q, then) {
+  const {error} = await q;
+  if (error) return toast(error.message);
+  then?.(); route();
+}
+const claim = (id, bought = false) => run(sb.from('claims').insert({item_id: id, qty: +$('#q' + id).value, bought}), bought ? gifts : snow);
+const markBought = id => run(sb.from('claims').update({bought: true}).eq('id', id), gifts);
+const unclaim = id => run(sb.from('claims').delete().eq('id', id));
+const delItem = id => confirm('Delete this wish?') && run(sb.from('items').delete().eq('id', id));
+
+function openItem(id) {
+  const f = $('#itemForm'), it = items.find(i => i.id === id) || {qty: 1, desire: 3};
+  f.dataset.id = id || '';
+  for (const el of f.elements) if (el.name) el.value = it[el.name] ?? '';
+  f.elements.url.dataset.done = it.url || '';
+  $('#itemDlg').showModal();
+}
+$('#addBtn').onclick = () => openItem();
+$('#itemForm').onsubmit = async e => {
+  e.preventDefault();
+  const row = Object.fromEntries(new FormData(e.target)), id = e.target.dataset.id;
+  row.price ||= null;
+  const {error} = await (id ? sb.from('items').update(row).eq('id', id) : sb.from('items').insert(row));
+  if (error) return toast(error.message);
+  $('#itemDlg').close(); if (!id) snow(); route();
+};
+
+// ---------- auto-fill from Open Graph ----------
+const urlIn = $('#itemForm').elements.url;
+urlIn.onchange = autofill;
+urlIn.onpaste = () => setTimeout(autofill);
+async function autofill() {
+  const E = $('#itemForm').elements, u = safe(E.url.value.trim());
+  if (!u || E.url.dataset.done === u) return;
+  E.url.dataset.done = u;
+  try {
+    const host = new URL(u).hostname.replace(/^www\./, '');
+    E.store.value ||= host;
+    toast('Looking up item…');
+    const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(u), {signal: AbortSignal.timeout(8000)});
+    const d = new DOMParser().parseFromString(await r.text(), 'text/html');
+    const m = k => d.querySelector(`meta[property="${k}"],meta[name="${k}"]`)?.content?.trim();
+    E.name.value ||= m('og:title') || d.title.trim();
+    const img = m('og:image') || m('twitter:image');
+    if (img) E.image.value ||= new URL(img, u).href;
+    const price = parseFloat((m('product:price:amount') || m('og:price:amount') || '').replace(/[^\d.]/g, ''));
+    if (price) E.price.value ||= price;
+    if (E.store.value === host) E.store.value = m('og:site_name') || host;
+    toast(E.name.value ? 'Auto-filled ✨' : "Couldn't find details. Enter them by hand.");
+  } catch { toast("Couldn't auto-fill. Enter details by hand."); }
+}
+
+// ---------- share ----------
+async function share(title, url, text = title) {
+  if (navigator.share) try { return await navigator.share({title, text, url}); } catch (e) { if (e.name === 'AbortError') return; }
+  shareUrl = url;
+  const m = encodeURIComponent(`${text} ${url}`);
+  $('#shareLinks').innerHTML = `
+    <button class="btn red" onclick="navigator.clipboard.writeText(shareUrl).then(() => toast('Link copied!'))">Copy link</button>
+    <a class="btn ghost text-center" href="sms:?&body=${m}">SMS</a>
+    <a class="btn ghost text-center" href="mailto:?subject=${encodeURIComponent(title)}&body=${m}">Email</a>
+    <a class="btn ghost text-center" href="https://wa.me/?text=${m}" target="_blank" rel="noopener">WhatsApp</a>`;
+  $('#shareDlg').showModal();
+}
+function shareItem(id) {
+  const i = items.find(x => x.id === id), p = fam.find(x => x.id === i.owner);
+  share(i.name, `${BASE}#u=${i.owner}`, `🎁 ${i.name} on ${p.name}'s wish list`);
+}
+$('#invite').onclick = () => share('Join our family Christmas wish list 🎄', `${BASE}?join=${me.family_id}`);
+</script>
+</body>
+</html>
