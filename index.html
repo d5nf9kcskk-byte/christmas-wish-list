@@ -70,6 +70,7 @@
   <input name="url" type="url" placeholder="Paste store link to auto-fill" aria-label="Store link" class="inp">
   <input name="name" required placeholder="What is it?" aria-label="Name" class="inp">
   <input name="image" type="url" placeholder="Image URL" aria-label="Image URL" class="inp">
+  <p class="text-xs opacity-60 -mt-1">No photo? On the store page, right-click the picture, choose Copy Image Address, and paste it here. Etsy blocks automatic photo lookup.</p>
   <div class="grid grid-cols-2 gap-3">
     <input name="store" placeholder="Store" aria-label="Store" class="inp">
     <input name="price" type="number" step="0.01" min="0" placeholder="Price" aria-label="Price" class="inp">
@@ -297,17 +298,28 @@ $('#itemForm').onsubmit = async e => {
 const urlIn = $('#itemForm').elements.url;
 urlIn.onchange = autofill;
 urlIn.onpaste = () => setTimeout(autofill);
+const STORE_NAMES = {'etsy.com': 'Etsy', 'amazon.com': 'Amazon', 'target.com': 'Target', 'walmart.com': 'Walmart', 'ebay.com': 'eBay', 'bestbuy.com': 'Best Buy', 'kohls.com': "Kohl's", 'macys.com': "Macy's"};
+function slugName(u) {
+  try {
+    const skip = new Set(['listing', 'dp', 'ip', 'p', 'product', 'products', 'gp']);
+    const cand = new URL(u).pathname.split('/').filter(Boolean)
+      .filter(s => !/^\d+$/.test(s) && !skip.has(s.toLowerCase()) && s.includes('-'))
+      .sort((a, b) => b.length - a.length)[0];
+    return cand ? decodeURIComponent(cand).replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase()) : '';
+  } catch { return ''; }
+}
 async function autofill() {
   const E = $('#itemForm').elements, u = safe(E.url.value.trim());
   if (!u || E.url.dataset.done === u) return;
   E.url.dataset.done = u;
+  const host = new URL(u).hostname.replace(/^www\./, '');
+  E.store.value ||= STORE_NAMES[host] || host;
+  toast('Looking up item…');
   try {
-    const host = new URL(u).hostname.replace(/^www\./, '');
-    E.store.value ||= host;
-    toast('Looking up item…');
     let htmlText = '';
-    for (const px of ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?url=']) {
-      try { const r = await fetch(px + encodeURIComponent(u), {signal: AbortSignal.timeout(8000)}); if (r.ok) { htmlText = await r.text(); break; } } catch {}
+    const routes = ['https://api.allorigins.win/raw?url=' + encodeURIComponent(u), 'https://api.codetabs.com/v1/proxy?quest=' + u];
+    for (const px of routes) {
+      try { const r = await fetch(px, {signal: AbortSignal.timeout(9000)}); if (r.ok) { htmlText = await r.text(); if (htmlText.length > 500) break; } } catch {}
     }
     if (!htmlText) throw new Error('fetch failed');
     const d = new DOMParser().parseFromString(htmlText, 'text/html');
@@ -333,8 +345,13 @@ async function autofill() {
     const price = parseFloat((m('product:price:amount') || m('og:price:amount') || '').replace(/[^\d.]/g, ''));
     if (price) E.price.value ||= price;
     if (E.store.value === host) E.store.value = m('og:site_name') || host;
-    toast(E.name.value ? 'Auto-filled ✨' : "Couldn't find details. Enter them by hand.");
-  } catch { toast("Couldn't auto-fill. Enter details by hand."); }
+  } catch {}
+  // Fallback that always works: Etsy and some other stores block scrapers, but the item name is in the link itself.
+  E.name.value ||= slugName(u);
+  E.name.value = E.name.value.replace(/\s+[-|]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
+  if (E.name.value && E.image.value) toast('Auto-filled ✨');
+  else if (E.name.value) toast('Name filled ✨ This store blocks photo lookup. Right-click the photo on the store page, Copy Image Address, and paste it into Image URL.');
+  else toast("Couldn't auto-fill. Enter details by hand.");
 }
 
 // ---------- share ----------
