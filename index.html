@@ -165,11 +165,11 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const safe = u => /^https?:\/\/./i.test(u || '') ? u : '';
 const BASE = location.origin + location.pathname;
+const FAMILY = 'f1111111-1111-1111-1111-111111111111'; // one single family for everyone
 const DESIRE = ['', 'Nice to have', 'Would like', 'Really want', 'Love it!', 'Dream gift'];
 let uid = undefined, me = null, fam = [], items = [], shareUrl = '', routeN = 0;
 
-const joinId = new URLSearchParams(location.search).get('join');
-if (joinId) { localStorage.join = joinId; history.replaceState(null, '', BASE + location.hash); }
+if (new URLSearchParams(location.search).get('join')) history.replaceState(null, '', BASE + location.hash); // old invite links: just clean the URL
 const pfParams = new URLSearchParams(location.search);
 if (pfParams.get('prefill')) {
   localStorage.prefill = JSON.stringify({name: pfParams.get('name') || '', url: pfParams.get('url') || '',
@@ -294,11 +294,6 @@ async function boot() {
   if (error) return toast(error.message);
   me = data;
   if (!me) return editProfile();
-  const j = localStorage.join; delete localStorage.join;
-  if (j && j !== me.family_id && confirm('Join the family from your invite link? Your list comes with you.')) {
-    const {error} = await sb.from('profiles').update({family_id: j}).eq('id', uid);
-    if (error) toast(error.message); else me.family_id = j;
-  }
   start();
 }
 
@@ -313,7 +308,7 @@ $('#profForm').onsubmit = async e => {
   e.preventDefault();
   const E = e.target.elements;
   const row = {id: uid, name: E.name.value.trim(), avatar: E.avatar.value.trim() || null,
-    family_id: me?.family_id || localStorage.join || crypto.randomUUID()};
+    family_id: FAMILY};
   const {data, error} = await sb.from('profiles').upsert(row).select().single();
   if (error) return toast(error.message);
   delete localStorage.join; me = data;
@@ -531,7 +526,7 @@ function shareItem(id) {
   const i = items.find(x => x.id === id), p = fam.find(x => x.id === i.owner);
   share(i.name, `${BASE}#u=${i.owner}`, `🎁 ${i.name} on ${p.name}'s wish list`);
 }
-$('#invite').onclick = () => share('Join our family Christmas wish list 🎄', `${BASE}?join=${me.family_id}`);
+$('#invite').onclick = () => share('Join our family Christmas wish list 🎄', BASE);
 </script>
 </body>
 </html>
