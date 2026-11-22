@@ -61,6 +61,11 @@
       <button id="shareList" class="btn ghost">Share</button>
       <button id="addBtn" class="btn red">+ Add wish</button>
     </div>
+    <div id="bmBar" class="hidden card p-4 mb-5 text-sm space-y-2">
+      <p><strong>Adding from Etsy, Amazon, Nike, or another store that blocks lookup?</strong> Drag this button to your bookmarks bar. Then, while you are on the item's page in that store, click it. It reads the name, photo, and price from the page you are looking at and opens your list with everything filled in.</p>
+      <a class="btn red inline-block" href="javascript:(function(){var m=function(k){var e=document.querySelector('meta[property=&quot;'+k+'&quot;],meta[name=&quot;'+k+'&quot;]');return e?e.content:''};var price='';try{var ss=document.querySelectorAll('script');for(var i=0;i<ss.length;i++){if(ss[i].type!=='application/ld+json')continue;var j=JSON.parse(ss[i].textContent);var a=[j].concat(j['@graph']||[]);for(var x=0;x<a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';}}}}catch(e){}var img=m('og:image');if(!img){var dyn=document.querySelector('[data-a-dynamic-image]');if(dyn){var mm=dyn.getAttribute('data-a-dynamic-image').match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);if(mm)img=mm[0].replace(/_AC_SS\d+_/,'_AC_SL500_');}}var name=m('og:title')||document.title;var pt=document.querySelector('#productTitle');if(pt)name=pt.textContent.trim().replace(/\s+/g,' ');var p=new URLSearchParams({prefill:'1',name:name,url:location.href,image:img,price:String(price||m('product:price:amount')||''),store:m('og:site_name')});window.open('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(),'_blank');})()">🎁 Add to my Wish List</a>
+      <p class="text-xs opacity-60">Works in desktop browsers. On a phone, paste the link as usual and use the photo tip in the add form.</p>
+    </div>
     <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </section>
 </main>
@@ -120,6 +125,12 @@ let uid = undefined, me = null, fam = [], items = [], shareUrl = '', routeN = 0;
 
 const joinId = new URLSearchParams(location.search).get('join');
 if (joinId) { localStorage.join = joinId; history.replaceState(null, '', BASE + location.hash); }
+const pfParams = new URLSearchParams(location.search);
+if (pfParams.get('prefill')) {
+  localStorage.prefill = JSON.stringify({name: pfParams.get('name') || '', url: pfParams.get('url') || '',
+    image: pfParams.get('image') || '', price: pfParams.get('price') || '', store: pfParams.get('store') || ''});
+  history.replaceState(null, '', BASE + location.hash);
+}
 
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.remove('opacity-0');
@@ -200,7 +211,22 @@ async function start() {
   if (error) return toast(error.message);
   fam = [me, ...data.filter(p => p.id !== uid)];
   $('#meAv').innerHTML = av(me);
-  show('listView'); route();
+  show('listView'); route(); checkPrefill();
+}
+
+function checkPrefill() {
+  let p = null;
+  try { p = JSON.parse(localStorage.prefill || 'null'); } catch {}
+  delete localStorage.prefill;
+  if (!p) return;
+  openItem();
+  const E = $('#itemForm').elements;
+  E.url.value = p.url || ''; E.url.dataset.done = p.url || '';
+  E.name.value = (p.name || '').replace(/^Amazon\.com:\s*/i, '').replace(/\s+[-|]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
+  E.image.value = p.image || '';
+  E.store.value = p.store || '';
+  if (p.price) E.price.value = parseFloat(p.price) || '';
+  toast('Filled from the store page ✨ Check it and Save.');
 }
 window.onhashchange = () => me && route();
 
@@ -210,6 +236,7 @@ async function route() {
   $('#fam').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="chip ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}${f.id === uid ? 'My list' : esc(f.name)}</a>`).join('');
   $('#listTitle').textContent = mine ? 'My wish list' : `${p.name}'s wish list`;
   $('#addBtn').classList.toggle('hidden', !mine);
+  $('#bmBar').classList.toggle('hidden', !mine);
   $('#shareList').onclick = () => share(`${p.name}'s Christmas wish list 🎄`, `${BASE}#u=${p.id}`);
   // claims(*) comes back empty on your own items: RLS hides them from owners.
   const {data, error} = await sb.from('items').select('*, claims(*)').eq('owner', p.id)
@@ -318,7 +345,7 @@ async function autofill() {
   try {
     let htmlText = '';
     // Etsy blocks every free fetcher (verified), so skip straight to the link-name fallback for it.
-    const routes = host === 'etsy.com' ? [] : ['https://api.allorigins.win/raw?url=' + encodeURIComponent(u), 'https://api.codetabs.com/v1/proxy?quest=' + u];
+    const routes = host === 'etsy.com' ? [] : ['https://api.allorigins.win/raw?url=' + encodeURIComponent(u), 'https://api.cors.lol/?url=' + encodeURIComponent(u)];
     for (const px of routes) {
       try { const r = await fetch(px, {signal: AbortSignal.timeout(9000)}); if (r.ok) { htmlText = await r.text(); if (htmlText.length > 500) break; } } catch {}
     }
@@ -343,13 +370,23 @@ async function autofill() {
     E.name.value ||= m('og:title') || d.title.trim();
     const img = m('og:image') || m('twitter:image');
     if (img) E.image.value ||= new URL(img, u).href;
+    // Amazon-style pages: no OG tags in the fetched copy, but the title element and a dynamic-image block are there.
+    if (!E.name.value || E.name.value.startsWith('Amazon.com')) {
+      const pt = d.querySelector('#productTitle')?.textContent.trim().replace(/\s+/g, ' ');
+      if (pt) E.name.value = pt;
+    }
+    if (!E.image.value) {
+      const dyn = d.querySelector('[data-a-dynamic-image]')?.getAttribute('data-a-dynamic-image') || '';
+      const mm = dyn.match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);
+      if (mm) E.image.value = mm[0].replace(/_AC_SS\d+_/, '_AC_SL500_');
+    }
     const price = parseFloat((m('product:price:amount') || m('og:price:amount') || '').replace(/[^\d.]/g, ''));
     if (price) E.price.value ||= price;
     if (E.store.value === host) E.store.value = m('og:site_name') || host;
   } catch {}
   // Fallback that always works: Etsy and some other stores block scrapers, but the item name is in the link itself.
   E.name.value ||= slugName(u);
-  E.name.value = E.name.value.replace(/\s+[-|]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
+  E.name.value = E.name.value.replace(/^Amazon\.com:\s*/i, '').replace(/\s+[-|]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
   if (E.name.value && E.image.value) toast('Auto-filled ✨');
   else if (E.name.value) toast('Name filled ✨ This store blocks photo lookup. Right-click the photo on the store page, Copy Image Address, and paste it into Image URL.');
   else toast("Couldn't auto-fill. Enter details by hand.");
