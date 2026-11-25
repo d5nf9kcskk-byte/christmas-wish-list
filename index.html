@@ -169,7 +169,7 @@
         <ul class="space-y-1">
           <li>💻 <strong>Computer with Chrome:</strong> the tree extension, in its section below. Nothing can block it; it is the one to use for Amazon. The bookmark button right under this box also works, on pages that allow it.</li>
           <li>🤖 <strong>Android phone:</strong> Add to Home screen once, then Share → Wish List from any store app. See the Android section below.</li>
-          <li>🍎 <strong>iPhone:</strong> use the Shortcuts way in the iPhone section below. It lives in the Share button, so it works in portrait mode, unlike the bookmarklet. Paste-a-link also always works.</li>
+          <li>🍎 <strong>iPhone:</strong> download the ready-made shortcut in the iPhone section below (one tap to install). It lives in the Share button, so it works in portrait mode, unlike the bookmarklet. Paste-a-link also always works.</li>
         </ul>
       </div>
       <p><strong>The bookmark (any desktop browser).</strong> Adding from Etsy, Amazon, Nike, or another store that blocks lookup? Drag this button to your bookmarks bar. Then open the item's own page in that store, not a search results or shop page, and click the bookmark there. It reads the name, photo, and price from the page you are looking at and opens your list with everything filled in. <strong>Already had the bookmark?</strong> Delete the old one and drag this new version: it opens the tab first, so Chrome's popup blocker cannot silently stop it, and if a new tab is blocked anyway it opens your list in the same tab instead of doing nothing.</p>
@@ -206,13 +206,21 @@
       <details class="text-sm">
         <summary class="font-semibold cursor-pointer">🍎 On an iPhone: the easy way (Shortcuts, works in portrait)</summary>
         <p class="mt-1">The Safari bookmarklet is awkward on an iPhone because the bookmarks panel only slides in beside the page in landscape; in portrait you cannot see your bookmarks and the page at the same time. Apple's own Shortcuts app fixes it: the shortcut lives in the Share button, so it works in portrait and landscape, in Safari and in Chrome.</p>
+        <p class="mt-1"><strong>Easiest: download the ready-made shortcut.</strong> <a class="underline font-semibold" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List.shortcut">📥 Download Add to Wish List (.shortcut)</a></p>
+        <ol class="list-decimal ml-5 mt-1 space-y-1">
+          <li>On your iPhone, tap the download link above in Safari. It downloads the shortcut file.</li>
+          <li>Open the downloaded file (tap it in the download bar, or find it in Files → Downloads). Shortcuts opens and shows what it does.</li>
+          <li>If iOS blocks it as an untrusted shortcut, open <strong>Settings → Shortcuts</strong> and turn on <strong>Allow Untrusted Shortcuts</strong>, then open the file again.</li>
+          <li>Tap <strong>Add Shortcut</strong>.</li>
+          <li>Use it: on any item page in Safari, tap <strong>Share → Add to Wish List</strong>. Your list opens with the name, photo, and price filled in. The first time, tap <strong>Allow</strong> when it asks to run on that page.</li>
+        </ol>
+        <p class="mt-1">If Shortcuts refuses the file, build it by hand in two minutes instead:</p>
         <ol class="list-decimal ml-5 mt-1 space-y-1">
           <li>First, once: open <strong>Settings → Shortcuts → Advanced</strong> and turn on <strong>Allow Running Scripts</strong>. (On newer iOS, it is under Settings → Apps → Shortcuts → Advanced.)</li>
           <li>Open the <strong>Shortcuts</strong> app, tap <strong>+</strong>, and add the action <strong>Run JavaScript on Web Page</strong>.</li>
           <li>Tap <strong>Copy Shortcut code</strong> below and paste it in place of the action's sample script. The code ends with <code>completion(...)</code>; that line is what hands the result back, so keep it.</li>
           <li>Add a second action below it: <strong>Open URLs</strong>, and set its address to the result of the JavaScript action (it shows as "Run JavaScript on Web Page" or "Shortcut Result").</li>
           <li>Tap the shortcut's name, call it <strong>Add to Wish List</strong>, open its details (ⓘ), and turn on <strong>Show in Share Sheet</strong>.</li>
-          <li>Use it: on any item page in Safari, tap <strong>Share → Add to Wish List</strong>. Your list opens with the name, photo, and price filled in. The first time, tap <strong>Allow</strong> when it asks to run on that page.</li>
         </ol>
         <p class="mt-1 opacity-70">Once you have it working on your phone, you can send it to family in one tap: in the Shortcuts app, long-press it → Share → Copy iCloud Link, and send them that link.</p>
         <button type="button" class="btn ghost text-sm mt-1" onclick="navigator.clipboard.writeText(document.getElementById('shortcutCode').textContent).then(() => toast('Shortcut code copied!'))">Copy Shortcut code</button>
