@@ -169,7 +169,7 @@
         <ul class="space-y-1">
           <li>💻 <strong>Computer with Chrome:</strong> the tree extension, in its section below. Nothing can block it; it is the one to use for Amazon. The bookmark button right under this box also works, on pages that allow it.</li>
           <li>🤖 <strong>Android phone:</strong> Add to Home screen once, then Share → Wish List from any store app. See the Android section below.</li>
-          <li>🍎 <strong>iPhone:</strong> copy the item's link and paste it into + Add wish, or do the one-time Safari bookmark setup. See the iPhone section below.</li>
+          <li>🍎 <strong>iPhone:</strong> use the Shortcuts way in the iPhone section below. It lives in the Share button, so it works in portrait mode, unlike the bookmarklet. Paste-a-link also always works.</li>
         </ul>
       </div>
       <p><strong>The bookmark (any desktop browser).</strong> Adding from Etsy, Amazon, Nike, or another store that blocks lookup? Drag this button to your bookmarks bar. Then open the item's own page in that store, not a search results or shop page, and click the bookmark there. It reads the name, photo, and price from the page you are looking at and opens your list with everything filled in. <strong>Already had the bookmark?</strong> Delete the old one and drag this new version: it opens the tab first, so Chrome's popup blocker cannot silently stop it, and if a new tab is blocked anyway it opens your list in the same tab instead of doing nothing.</p>
@@ -204,7 +204,29 @@
         </ol>
       </details>
       <details class="text-sm">
-        <summary class="font-semibold cursor-pointer">On an iPhone (Safari): bookmarklet setup, one time</summary>
+        <summary class="font-semibold cursor-pointer">🍎 On an iPhone: the easy way (Shortcuts, works in portrait)</summary>
+        <p class="mt-1">The Safari bookmarklet is awkward on an iPhone because the bookmarks panel only slides in beside the page in landscape; in portrait you cannot see your bookmarks and the page at the same time. Apple's own Shortcuts app fixes it: the shortcut lives in the Share button, so it works in portrait and landscape, in Safari and in Chrome.</p>
+        <ol class="list-decimal ml-5 mt-1 space-y-1">
+          <li>First, once: open <strong>Settings → Shortcuts → Advanced</strong> and turn on <strong>Allow Running Scripts</strong>. (On newer iOS, it is under Settings → Apps → Shortcuts → Advanced.)</li>
+          <li>Open the <strong>Shortcuts</strong> app, tap <strong>+</strong>, and add the action <strong>Run JavaScript on Web Page</strong>.</li>
+          <li>Tap <strong>Copy Shortcut code</strong> below and paste it in place of the action's sample script. The code ends with <code>completion(...)</code>; that line is what hands the result back, so keep it.</li>
+          <li>Add a second action below it: <strong>Open URLs</strong>, and set its address to the result of the JavaScript action (it shows as "Run JavaScript on Web Page" or "Shortcut Result").</li>
+          <li>Tap the shortcut's name, call it <strong>Add to Wish List</strong>, open its details (ⓘ), and turn on <strong>Show in Share Sheet</strong>.</li>
+          <li>Use it: on any item page in Safari, tap <strong>Share → Add to Wish List</strong>. Your list opens with the name, photo, and price filled in. The first time, tap <strong>Allow</strong> when it asks to run on that page.</li>
+        </ol>
+        <p class="mt-1 opacity-70">Once you have it working on your phone, you can send it to family in one tap: in the Shortcuts app, long-press it → Share → Copy iCloud Link, and send them that link.</p>
+        <button type="button" class="btn ghost text-sm mt-1" onclick="navigator.clipboard.writeText(document.getElementById('shortcutCode').textContent).then(() => toast('Shortcut code copied!'))">Copy Shortcut code</button>
+        <pre id="shortcutCode" class="mt-2 p-2 rounded-lg text-xs overflow-x-auto whitespace-pre" style="background:#14532d14">var m=function(k){var e=document.querySelector('meta[property="'+k+'"],meta[name="'+k+'"]');return e?e.content:''};
+var price='';
+try{var ss=document.querySelectorAll('script[type="application/ld+json"]');for(var i=0;i&lt;ss.length&amp;&amp;!price;i++){var j=JSON.parse(ss[i].textContent);var a=(Array.isArray(j)?j:[j]).concat(j['@graph']||[]);for(var x=0;x&lt;a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';if(price)break}}}}catch(e){}
+var img=m('og:image');
+if(!img){var dyn=document.querySelector('[data-a-dynamic-image]');if(dyn){var mm=dyn.getAttribute('data-a-dynamic-image').match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);if(mm)img=mm[0].replace(/_AC_SS\d+_/,'_AC_SL500_')}}
+var name=m('og:title')||document.title;var pt=document.querySelector('#productTitle');if(pt)name=pt.textContent.trim().replace(/\s+/g,' ');
+var p=new URLSearchParams({prefill:'1',name:name,url:location.href,image:img,price:String(price||m('product:price:amount')||''),store:m('og:site_name')});
+completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString());</pre>
+      </details>
+      <details class="text-sm">
+        <summary class="font-semibold cursor-pointer">On an iPhone (Safari): the bookmarklet way, one time</summary>
         <ol class="list-decimal ml-5 mt-1 space-y-1">
           <li>Tap <strong>Copy bookmarklet code</strong> above.</li>
           <li>In Safari, open any page and add a bookmark named <strong>Add to Wish List</strong> (Share button, then Add Bookmark).</li>
