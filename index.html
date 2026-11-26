@@ -1373,6 +1373,7 @@ async function autofill() {
   } catch {}
   // 3. JSON-LD Product image.
   if (!E.image.value && ld.image) E.image.value = ld.image;
+  E.image.value = safe(E.image.value); // drop inline data: placeholders (Amazon serves a blank 1x1 one)
   // 4. A screenshot of the page. Can be a "prove you're human" page; the preview shows it before Save.
   // ponytail: stores microlink's CDN link as-is; copy it into item-photos if those links start expiring.
   if (!E.image.value && host !== 'etsy.com') try {
