@@ -30,7 +30,7 @@
   @keyframes barber{to{background-position:14px 0}}
   .red{background:#c0392b;color:#fff} .red:hover{background:#a93226}
   .green{background:#1f6f4a;color:#fff} .green:hover{background:#185a3c}
-  .ghost{background:#fff;border:2px solid #f3d9c6} .ghost:hover{border-color:#c0392b}
+  .ghost{background:#fff;border:2px solid #f3d9c6;color:#3b1d14} .ghost:hover{border-color:#c0392b}
   .inp{width:100%;border:2px solid #f3d9c6;border-radius:1rem;padding:.6rem .9rem;background:#fff;transition:border-color .2s}
   .inp:focus{outline:none;border-color:#c0392b}
   .card{background:#fff;border-radius:1.75rem;overflow:hidden;box-shadow:0 4px 14px #3b1d1412;transition:transform .25s,box-shadow .25s}
@@ -43,7 +43,7 @@
   .famlink:hover{background:#fff7ed}
   .famlink.on{background:#c0392b;color:#fff}
   .famlink .cnt{margin-left:auto;font-size:.8rem;opacity:.7;white-space:nowrap}
-  dialog{border-radius:1.75rem;padding:0;width:min(32rem,94vw);max-height:90vh;color:inherit}
+  dialog{border-radius:1.75rem;padding:0;width:min(32rem,94vw);max-height:90vh;color:#3b1d14}
   dialog::backdrop{background:#3b1d1466;backdrop-filter:blur(3px)}
   dialog[open]{animation:pop .25s ease} @keyframes pop{from{transform:scale(.92);opacity:0}}
   .fade{animation:fade .35s ease} @keyframes fade{from{opacity:0;transform:translateY(8px)}}
@@ -73,6 +73,7 @@
   #orn.jingling,#lights.jingling .bulb{animation:jingle .9s ease-in-out;transform-origin:50% -6px}
   @keyframes jingle{0%,100%{transform:rotate(0)}15%{transform:rotate(-16deg)}30%{transform:rotate(13deg)}45%{transform:rotate(-9deg)}60%{transform:rotate(6deg)}75%{transform:rotate(-3deg)}}
   @media (prefers-reduced-motion: reduce){#deer{display:none}}
+  @media (pointer:coarse){.btn{min-height:44px} #menuBtn{min-width:44px}}
   .wiggle{animation:wig .5s ease} @keyframes wig{25%{transform:rotate(-6deg) scale(1.12)}75%{transform:rotate(6deg) scale(1.12)}}
   :root{--acc:#c0392b;--acc2:#1f6f4a;--hdr1:#14532d;--hdr2:#1c6b41}
   body[data-skin="mint"]{--acc:#0e9594;--acc2:#5aa469;--hdr1:#0b5563;--hdr2:#12836f}
@@ -119,7 +120,7 @@
     </div>
   </div>
   <div id="lights" class="flex justify-center gap-2 sm:gap-3 px-2 overflow-hidden" aria-hidden="true"></div>
-  <div id="npLine" class="text-center text-[11px] leading-tight text-white/75 pb-1.5 px-2 truncate"></div>
+  <div id="npLine" class="text-center text-[11px] leading-tight text-white/90 pb-1.5 px-2 truncate"></div>
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-6">
@@ -180,7 +181,7 @@
       </div>
       <p class="opacity-70">One-click adding from Amazon, Etsy, and other stores. One-time setup, per device. Open Setup only when you need it; the rest of the time this stays tucked away.</p>
       <div id="bmBody" class="hidden space-y-3 pt-1">
-      <div class="rounded-xl p-3" style="background:#14532d14">
+      <div class="border-l-4 border-[#1f6f4a] pl-3 py-1">
         <p class="font-semibold mb-1">Pick your device:</p>
         <ul class="space-y-1">
           <li>💻 <strong>Computer with Chrome:</strong> the tree extension, in its section below. Nothing can block it; it is the one to use for Amazon. The bookmark button right under this box also works, on pages that allow it.</li>
@@ -240,7 +241,7 @@
         </ol>
         <p class="mt-1 opacity-70">Once you have it working on your phone, you can send it to family in one tap: in the Shortcuts app, long-press it → Share → Copy iCloud Link, and send them that link.</p>
         <button type="button" class="btn ghost text-sm mt-1" onclick="navigator.clipboard.writeText(document.getElementById('shortcutCode').textContent).then(() => toast('Shortcut code copied!'))">Copy Shortcut code</button>
-        <pre id="shortcutCode" class="mt-2 p-2 rounded-lg text-xs overflow-x-auto whitespace-pre" style="background:#14532d14">var m=function(k){var e=document.querySelector('meta[property="'+k+'"],meta[name="'+k+'"]');return e?e.content:''};
+        <pre id="shortcutCode" class="mt-2 p-2 rounded-lg text-xs overflow-x-auto whitespace-pre" style="background:#ecf1ee">var m=function(k){var e=document.querySelector('meta[property="'+k+'"],meta[name="'+k+'"]');return e?e.content:''};
 var price='';
 try{var ss=document.querySelectorAll('script[type="application/ld+json"]');for(var i=0;i&lt;ss.length&amp;&amp;!price;i++){var j=JSON.parse(ss[i].textContent);var a=(Array.isArray(j)?j:[j]).concat(j['@graph']||[]);for(var x=0;x&lt;a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';if(price)break}}}}catch(e){}
 var img=m('og:image');
@@ -291,7 +292,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
 </main>
 
 <dialog id="itemDlg"><form id="itemForm" class="p-6 space-y-3">
-  <h3 class="font-xmas text-3xl">Your wish ✨</h3>
+  <h3 class="font-xmas text-3xl outline-none" tabindex="-1" autofocus>Your wish ✨</h3>
   <input name="url" type="url" placeholder="Paste store link to auto-fill" aria-label="Store link" class="inp">
   <input name="name" required placeholder="What is it?" aria-label="Name" class="inp">
   <input name="image" type="url" placeholder="Image URL" aria-label="Image URL" class="inp">
@@ -317,7 +318,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
 </form></dialog>
 
 <dialog id="profDlg"><form id="profForm" class="p-6 space-y-3">
-  <h3 class="font-xmas text-3xl">Your profile 🎅</h3>
+  <h3 class="font-xmas text-3xl outline-none" tabindex="-1" autofocus>Your profile 🎅</h3>
   <input name="name" required maxlength="60" placeholder="Your name" aria-label="Name" class="inp">
   <div class="flex items-center gap-3">
     <span id="profPreview" class="flex-none"></span>
@@ -333,7 +334,10 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
       <button type="button" class="btn ghost text-xs" onclick="setSkin('midnight')">🌌 Night</button>
     </div>
   </div>
-  <button class="btn red w-full">Save</button>
+  <div class="flex gap-2">
+    <button type="button" class="btn ghost flex-1" onclick="me && profDlg.close()">Close</button>
+    <button class="btn red flex-1">Save</button>
+  </div>
 </form></dialog>
 
 <dialog id="shareDlg"><div class="p-6 space-y-3">
@@ -343,7 +347,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
 </div></dialog>
 
 <dialog id="thanksDlg"><form id="thanksForm" class="p-6 space-y-3">
-  <h3 class="font-xmas text-3xl">Send thanks 💌</h3>
+  <h3 class="font-xmas text-3xl outline-none" tabindex="-1" autofocus>Send thanks 💌</h3>
   <p id="thanksFor" class="text-sm opacity-80"></p>
   <textarea name="message" required maxlength="500" rows="3" class="inp" placeholder="Thank you for…"></textarea>
   <input type="hidden" name="claim">
@@ -534,8 +538,10 @@ function season() {
 // Mobile header menu (☰): the extra buttons live in #menu, a dropdown under 640px.
 const menu = $('#menu'), menuBtn = $('#menuBtn');
 const setMenu = open => { menu.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', open); };
-menuBtn.onclick = e => { e.stopPropagation(); setMenu(!menu.classList.contains('open')); };
-addEventListener('click', () => setMenu(false));
+menuBtn.onclick = () => setMenu(!menu.classList.contains('open'));
+menu.onclick = () => setMenu(false); // picked an item
+// pointerdown, not click: iOS Safari sends no click for taps on plain content, so the menu never closed.
+addEventListener('pointerdown', e => { if (!e.target.closest('#menu,#menuBtn')) setMenu(false); });
 
 // Easter egg 1: triple-click (or triple-tap) the title for a snowfall flurry.
 let titleClicks = 0, titleTimer = 0;
@@ -646,7 +652,7 @@ async function start() {
   const {data, error} = await sb.from('profiles').select().order('name');
   if (error) return toast(error.message);
   fam = [me, ...data.filter(p => p.id !== uid)];
-  $('#meAv').innerHTML = av(me);
+  $('#meAv').innerHTML = av(me, 'w-11 h-11');
   show('listView'); route(); checkPrefill(); season();
   if (localStorage.snow !== 'off'
       && !matchMedia('(prefers-reduced-motion: reduce)').matches) toggleSnow(true);
