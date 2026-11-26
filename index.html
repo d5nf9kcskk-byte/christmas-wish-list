@@ -270,7 +270,7 @@
             <li>In <strong>Settings → Apps → Shortcuts → Advanced</strong>, turn on <strong>Allow Running Scripts</strong>. It's off on new devices, and the shortcut can't turn it on for you.</li>
             <li>On an item's page, tap <strong>Share → Add to Wish List</strong>.</li>
           </ol>
-          <p class="opacity-70">The first time on each store, it asks permission. Tap <strong>Always Allow</strong>. If it stops, share again; the second try works.</p>
+          <p class="opacity-70">The first time on each store, it asks permission. Tap <strong>Allow</strong> (or <strong>Always Allow</strong> if offered). If it stops, share again; the second try works.</p>
         </div>
         <div data-key="iphone-chrome" hidden class="space-y-2">
           <a class="btn green inline-block" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List%20(Chrome).shortcut?v=4">📥 Get the shortcut</a>
@@ -278,7 +278,7 @@
             <li>Open the download and tap <strong>Add Shortcut</strong>.</li>
             <li>On an item's page, tap <strong>Share → Add to Wish List (Chrome)</strong>.</li>
           </ol>
-          <p class="opacity-70">The first time on each store, it asks permission. Tap <strong>Always Allow</strong>. If it stops, share again; the second try works. If the photo or price is missing, add it before you save.</p>
+          <p class="opacity-70">The first time on each store, it asks permission. Tap <strong>Allow</strong> (or <strong>Always Allow</strong> if offered). If it stops, share again; the second try works. If the photo or price is missing, add it before you save.</p>
         </div>
         <div data-key="android" hidden class="space-y-2">
           <ol class="list-decimal ml-5 space-y-1">
@@ -1316,6 +1316,13 @@ async function autofill() {
   $('#pv').innerHTML = '<span class="text-sm opacity-60 animate-pulse">🔎</span>'; $('#pvName').textContent = 'Looking it up…';
   const ml = async q => (await fetch('https://api.microlink.io/?url=' + encodeURIComponent(u) + q, {signal: AbortSignal.timeout(12000)})).json();
   let ld = {}, shot = false;
+  // 0. Amazon: the product ID in the link gives the exact main photo, no page scraping (bot walls don't matter).
+  const asin = /amazon\./.test(host) && u.match(/\/(?:dp|gp\/product|gp\/aw\/d|product)\/([A-Z0-9]{10})/i)?.[1];
+  if (asin && !E.image.value) {
+    const src = `https://m.media-amazon.com/images/P/${asin.toUpperCase()}.01._SCLZZZZZZZ_.jpg`;
+    // a wrong ID comes back as a 1x1 placeholder, not an error
+    if (await new Promise(r => { const im = new Image(); im.onload = () => r(im.naturalWidth > 1); im.onerror = () => r(false); im.src = src; })) E.image.value = src;
+  }
   try {
     let htmlText = '';
     // Etsy blocks every free fetcher (verified), so skip straight to the link-name fallback for it.
