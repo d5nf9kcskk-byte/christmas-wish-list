@@ -37,7 +37,7 @@
   #grid .card:hover{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 16px 34px #3b1d1426}
   #grid .card img{transition:transform .5s ease}
   #grid .card:hover img{transform:scale(1.06)}
-  .chip{display:flex;align-items:center;gap:.5rem;padding:.45rem 1rem .45rem .45rem;border-radius:9999px;background:#fff;white-space:nowrap;font-weight:500;transition:background .2s,color .2s}
+  .chip{display:flex;align-items:center;gap:.5rem;padding:.45rem 1rem;border-radius:9999px;background:#fff;white-space:nowrap;font-weight:500;transition:background .2s,color .2s}
   .chip.on{background:#c0392b;color:#fff}
   .famlink{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:1rem;font-weight:500;width:100%;transition:background .2s,color .2s}
   .famlink:hover{background:#fff7ed}
@@ -59,7 +59,20 @@
   @keyframes txPop{0%{transform:scale(0);opacity:0}70%{transform:scale(1.3);opacity:1}100%{transform:scale(1);opacity:1}}
   dialog form{max-height:90vh;overflow-y:auto}
   #toast{max-width:92vw;text-align:center}
-  #snowCv{position:fixed;inset:0;pointer-events:none;z-index:5}
+  #snowCv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+  html{scroll-padding-top:6.5rem}
+  #menu{display:flex;align-items:center;gap:.5rem}
+  @media (max-width:639px){
+    #menu{display:none;position:absolute;right:.75rem;top:calc(100% - .25rem);flex-direction:column;align-items:stretch;padding:.75rem;min-width:11rem;background:#fff;border-radius:1.25rem;box-shadow:0 12px 30px #3b1d1433;z-index:20}
+    #menu.open{display:flex}
+  }
+  #deer{position:absolute;bottom:.4rem;left:100%;font-size:1.5rem;white-space:nowrap;pointer-events:none;animation:sleigh 40s linear infinite}
+  @keyframes sleigh{0%,70%{transform:translateX(0)}100%{transform:translateX(calc(-100vw - 8rem))}}
+  #orn{width:14px;height:14px;border-radius:9999px;vertical-align:middle;margin-left:.5rem;opacity:.35;background:radial-gradient(circle at 35% 30%,#fff9,#d4a017 45%,#a8770e);transition:opacity .2s,transform .2s}
+  #orn:hover{opacity:1;transform:scale(1.25)}
+  #orn.jingling,#lights.jingling .bulb{animation:jingle .9s ease-in-out;transform-origin:50% -6px}
+  @keyframes jingle{0%,100%{transform:rotate(0)}15%{transform:rotate(-16deg)}30%{transform:rotate(13deg)}45%{transform:rotate(-9deg)}60%{transform:rotate(6deg)}75%{transform:rotate(-3deg)}}
+  @media (prefers-reduced-motion: reduce){#deer{display:none}}
   .wiggle{animation:wig .5s ease} @keyframes wig{25%{transform:rotate(-6deg) scale(1.12)}75%{transform:rotate(6deg) scale(1.12)}}
   :root{--acc:#c0392b;--acc2:#1f6f4a;--hdr1:#14532d;--hdr2:#1c6b41}
   body[data-skin="mint"]{--acc:#0e9594;--acc2:#5aa469;--hdr1:#0b5563;--hdr2:#12836f}
@@ -91,19 +104,22 @@
 <body class="min-h-screen">
 
 <header class="sticky top-0 z-10 shadow-lg" style="background:linear-gradient(90deg,var(--hdr1),var(--hdr2),var(--hdr1))">
-  <div class="max-w-7xl mx-auto px-4 pt-3 pb-1 flex items-center gap-2">
-    <h1 id="logoTitle" class="font-xmas text-3xl sm:text-4xl text-white tracking-wide flex-1 cursor-pointer select-none">🎄 Christmas Wish List</h1>
-    <div id="who" class="hidden flex items-center gap-2">
-      <button id="snowBtn" class="btn ghost text-sm" title="Toggle snowfall">❄️</button>
-      <button id="fireBtn" class="btn ghost text-sm" title="Fireplace mode">🔥</button>
-      <button id="stashBtn" class="btn ghost text-sm" title="My secret stash: everything I have claimed">🧺 Stash</button>
-      <button id="invite" class="btn ghost text-sm">Invite</button>
+  <div class="max-w-7xl mx-auto px-3 sm:px-4 pt-2.5 pb-1 flex items-center gap-2">
+    <h1 id="logoTitle" class="font-xmas text-[1.65rem] leading-tight sm:text-4xl text-white tracking-wide flex-1 min-w-0 truncate cursor-pointer select-none">🎄 Christmas Wish List</h1>
+    <div id="who" class="hidden flex items-center gap-2 flex-none">
+      <div id="menu">
+        <button id="snowBtn" class="btn ghost text-sm" title="Toggle snowfall">❄️<span class="sm:hidden"> Snow</span></button>
+        <button id="fireBtn" class="btn ghost text-sm" title="Fireplace mode">🔥<span class="sm:hidden"> Fireplace</span></button>
+        <button id="stashBtn" class="btn ghost text-sm" title="My secret stash: everything I have claimed">🧺 Stash</button>
+        <button id="invite" class="btn ghost text-sm">Invite</button>
+        <button id="logout" class="btn ghost text-sm">Sign out</button>
+      </div>
       <button id="meAv" onclick="editProfile()" aria-label="Edit profile" class="rounded-full ring-2 ring-amber-300"></button>
-      <button id="logout" class="btn ghost text-sm">Sign out</button>
+      <button id="menuBtn" type="button" class="btn ghost text-sm !px-3 sm:hidden" aria-label="Menu" aria-expanded="false" aria-controls="menu">☰</button>
     </div>
   </div>
   <div id="lights" class="flex justify-center gap-2 sm:gap-3 px-2 overflow-hidden" aria-hidden="true"></div>
-  <div id="npLine" class="text-center text-[11px] leading-tight text-white/75 pb-1.5 px-2"></div>
+  <div id="npLine" class="text-center text-[11px] leading-tight text-white/75 pb-1.5 px-2 truncate"></div>
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-6">
@@ -152,7 +168,7 @@
     </div>
     <div id="seasonBar" class="hidden text-center font-semibold mb-4"></div>
     <div class="flex flex-wrap items-center gap-3 mb-5">
-      <h2 id="listTitle" class="font-xmas text-4xl sm:text-5xl flex-1"></h2>
+      <h2 id="listTitle" class="font-xmas text-4xl sm:text-5xl flex-1 basis-full sm:basis-0"></h2>
       <button id="pickBtn" class="btn ghost hidden">🎲 Surprise me</button>
       <button id="shareList" class="btn ghost">Share</button>
       <button id="addBtn" class="btn red">+ Add wish</button>
@@ -263,7 +279,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
 
   <section id="stashView" class="hidden">
     <div class="flex flex-wrap items-center gap-3 mb-5">
-      <h2 class="font-xmas text-4xl sm:text-5xl flex-1">🧺 My secret stash</h2>
+      <h2 class="font-xmas text-4xl sm:text-5xl flex-1 basis-full sm:basis-0">🧺 My secret stash</h2>
       <button class="btn ghost noprint" onclick="window.print()">🖨 Print list</button>
       <button class="btn red noprint" onclick="show('listView')">← Back to lists</button>
     </div>
@@ -271,7 +287,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
     <p id="stashTotals" class="mb-4 font-semibold"></p>
     <div id="stashList" class="space-y-3"></div>
   </section>
-  <footer class="reveal rv-t text-center text-sm opacity-60 pb-10 pt-4">Made with ❤️ for the family · 🎄 Merry Christmas 🎁</footer>
+  <footer class="reveal rv-t relative overflow-hidden text-center text-sm pb-12 pt-4"><span class="opacity-60">Made with ❤️ for the family · 🎄 Merry Christmas 🎁</span><button id="orn" type="button" aria-label="Ornament"></button><span id="deer" aria-hidden="true">🦌🦌🛷</span></footer>
 </main>
 
 <dialog id="itemDlg"><form id="itemForm" class="p-6 space-y-3">
@@ -460,21 +476,23 @@ function gifts() {
 }
 
 // ---------- phase 3: snowfall, season bar, easter eggs ----------
-let snowing = false, sctx = null, flakes = [], sraf = 0;
+let snowing = false, heavy = false, sctx = null, flakes = [], sraf = 0;
 function toggleSnow(on = !snowing) {
   snowing = on; localStorage.snow = on ? 'on' : 'off';
+  cancelAnimationFrame(sraf); // never run two loops
   let cv = $('#snowCv');
+  // Canvas is CSS-sized to the viewport (100%/100%) and its pixels follow, so the drift always sits at the real bottom on iOS.
   if (on && !cv) {
     cv = document.createElement('canvas'); cv.id = 'snowCv'; document.body.append(cv);
-    addEventListener('resize', () => { cv.width = innerWidth; cv.height = innerHeight; });
+    addEventListener('resize', () => { cv.width = cv.clientWidth; cv.height = cv.clientHeight; });
   }
-  if (cv) { cv.width = innerWidth; cv.height = innerHeight; cv.style.display = on ? '' : 'none'; }
-  if (!on) return cancelAnimationFrame(sraf);
+  if (cv) { cv.style.display = on ? '' : 'none'; cv.width = cv.clientWidth; cv.height = cv.clientHeight; }
+  if (!on) return;
   sctx = cv.getContext('2d');
-  const COLORS = ['#ffffff', '#bfdbfe', '#93c5fd', '#dbeafe'];
-  flakes = Array.from({length: Math.min(90, Math.max(30, innerWidth / 14))}, () => ({
-    x: Math.random() * cv.width, y: Math.random() * cv.height, r: 1 + Math.random() * 2.2,
-    s: .4 + Math.random() * 1.1, p: Math.random() * 6.28, c: COLORS[Math.floor(Math.random() * COLORS.length)]}));
+  const COLORS = ['#ffffff', '#bfdbfe', '#93c5fd', '#dbeafe'], k = heavy ? 3 : 1;
+  flakes = Array.from({length: Math.min(90, Math.max(30, cv.width / 14)) * k}, () => ({
+    x: Math.random() * cv.width, y: Math.random() * cv.height, r: (1 + Math.random() * 2.2) * (heavy ? 1.4 : 1),
+    s: (.4 + Math.random() * 1.1) * (heavy ? 1.8 : 1), p: Math.random() * 6.28, c: COLORS[Math.floor(Math.random() * COLORS.length)]}));
   let drift = 0;
   const tick = () => {
     if (!snowing) return;
@@ -513,24 +531,42 @@ function season() {
   } else bar.className = 'hidden';
 }
 
-// Easter egg 1: click the title five times.
+// Mobile header menu (☰): the extra buttons live in #menu, a dropdown under 640px.
+const menu = $('#menu'), menuBtn = $('#menuBtn');
+const setMenu = open => { menu.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', open); };
+menuBtn.onclick = e => { e.stopPropagation(); setMenu(!menu.classList.contains('open')); };
+addEventListener('click', () => setMenu(false));
+
+// Easter egg 1: triple-click (or triple-tap) the title for a snowfall flurry.
 let titleClicks = 0, titleTimer = 0;
 $('#logoTitle').onclick = () => {
-  clearTimeout(titleTimer); titleTimer = setTimeout(() => titleClicks = 0, 2500);
-  if (++titleClicks < 5) return;
+  clearTimeout(titleTimer); titleTimer = setTimeout(() => titleClicks = 0, 1200);
+  if (++titleClicks < 3) return;
   titleClicks = 0;
-  confetti({particleCount: 24, shapes: [confetti.shapeFromText({text: '🎅', scalar: 2})], scalar: 2, spread: 130,
-    ticks: 130, origin: {y: .4}, disableForReducedMotion: true});
-  toast('Ho ho ho! 🎅 You found a secret.');
+  for (let n = 0; n < 4; n++) setTimeout(() => confetti({particleCount: 60, angle: 270, spread: 160, startVelocity: 8,
+    gravity: .35, ticks: 90, scalar: 1.1, colors: ['#ffffff', '#dbeafe', '#bfdbfe'], shapes: ['circle'],
+    origin: {x: Math.random(), y: -.05}, disableForReducedMotion: true}), n * 150);
+  toast('❄️ Let it snow!');
 };
-// Easter egg 2: type "santa" anywhere.
+// Easter eggs 2 + 3: type "snow" for blizzard mode (again to calm it), or "santa". Not while typing in a field.
 let typed = '';
 addEventListener('keydown', e => {
-  if (e.key.length !== 1) return;
+  if (e.key === 'Escape') setMenu(false);
+  if (e.key.length !== 1 || e.target.closest?.('input,textarea,select,[contenteditable]')) return;
   typed = (typed + e.key.toLowerCase()).slice(-5);
-  if (typed !== 'santa') return;
-  typed = ''; gifts(); toast('🎅 Santa heard you!');
+  if (typed.endsWith('snow')) {
+    typed = ''; heavy = !heavy; toggleSnow(true);
+    toast(heavy ? '🌨 Blizzard mode! Type snow again to calm it.' : '❄️ Back to gentle snow');
+  } else if (typed === 'santa') { typed = ''; gifts(); toast('🎅 Santa heard you!'); }
 });
+// Easter egg 4: the hidden gold ornament in the footer jingles the lights.
+$('#orn').onclick = () => {
+  for (const el of [$('#lights'), $('#orn')]) { el.classList.remove('jingling'); void el.offsetWidth; el.classList.add('jingling'); }
+  confetti({particleCount: 14, shapes: [confetti.shapeFromText({text: '🔔', scalar: 2})], scalar: 2, spread: 100,
+    ticks: 100, origin: {y: .9}, disableForReducedMotion: true});
+  toast('🔔 Jingle all the way!');
+};
+// Easter egg 5 is the reindeer sleigh crossing the footer (pure CSS, #deer); egg 6 is the Dec 25 banner in season().
 
 // ---------- auth ----------
 const creds = () => ({email: $('#email').value.trim(), password: $('#pw').value});
@@ -830,18 +866,21 @@ async function route() {
   renderTree(); renderAdv(); renderThanks();
 }
 
+// No photo, or a photo link that fails to load: a shorter box with a centered gift instead of a big empty square.
+const GIFT = '<span class="text-6xl cursor-pointer" title="Psst… click me" onclick="this.classList.remove(\'wiggle\');void this.offsetWidth;this.classList.add(\'wiggle\');snow()">🎁</span>';
+function noImg(el) { el.parentElement.classList.replace('aspect-square', 'aspect-[4/3]'); el.outerHTML = GIFT; }
 function card(i, mine, ix = 0) {
   const got = i.claims.reduce((s, c) => s + c.qty, 0), left = i.qty - got;
   const img = safe(i.image)
-    ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover">`
-    : '<span class="text-7xl cursor-pointer" title="Psst… click me" onclick="this.classList.remove(\'wiggle\');void this.offsetWidth;this.classList.add(\'wiggle\');snow()">🎁</span>';
+    ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover" onerror="noImg(this)">`
+    : GIFT;
   const sm = 'btn text-sm';
-  return `<article id="item${i.id}" data-cid="${i.id}" class="card reveal ${seenCards.has(i.id) ? 'in' : ''} flex flex-col relative ${!mine && left <= 0 ? 'ring-2 ring-green-700/40' : ''}">
+  return `<article id="item${i.id}" data-cid="${i.id}" class="card reveal ${seenCards.has(i.id) ? 'in' : ''} flex flex-col relative">
     ${!mine && left <= 0 ? '<span class="absolute top-4 -right-9 rotate-45 bg-[#1f6f4a] text-white text-xs font-bold px-9 py-1 shadow z-10">Wrapped up!</span>' : ''}
-    <div class="aspect-square bg-red-50 grid place-items-center overflow-hidden">${img}</div>
+    <div class="${safe(i.image) ? 'aspect-square' : 'aspect-[4/3]'} bg-gradient-to-br from-red-50 to-amber-50 grid place-items-center overflow-hidden">${img}</div>
     <div class="p-4 flex flex-col gap-2 flex-1">
       <div class="flex items-start gap-2">
-        <h3 class="text-lg font-semibold flex-1 leading-tight">${esc(i.name)}</h3>
+        <h3 class="text-xl font-semibold flex-1 leading-tight">${esc(i.name)}</h3>
         ${i.price ? `<span class="font-bold text-[#1f6f4a]">$${(+i.price).toFixed(2)}</span>` : ''}
       </div>
       <div class="text-sm"><span class="text-amber-500">${'★'.repeat(i.desire)}${'☆'.repeat(5 - i.desire)}</span> ${DESIRE[i.desire]}</div>
@@ -860,7 +899,7 @@ function card(i, mine, ix = 0) {
 function claimBox(i, got, left) {
   const my = i.claims.find(c => c.user_id === uid), sm = 'btn text-sm';
   return `<div class="border-t border-orange-100 pt-3 mt-1 space-y-2">
-    <div class="h-2 rounded-full bg-orange-100 overflow-hidden"><div class="h-full claimbar rounded-full transition-all duration-500" style="width:${Math.round(got / i.qty * 100)}%"></div></div>
+    ${got ? `<div class="h-2 rounded-full bg-orange-100 overflow-hidden"><div class="h-full claimbar rounded-full transition-all duration-500" style="width:${Math.round(got / i.qty * 100)}%"></div></div>` : ''}
     <div class="text-sm font-semibold ${left <= 0 ? 'text-[#1f6f4a]' : ''}">${left <= 0 ? '🎉 Fully claimed' : `${got} of ${i.qty} claimed`}</div>
     ${my ? `<div class="flex flex-wrap items-center gap-2 text-sm">You claimed
         <select id="cq${my.id}" aria-label="Your claimed quantity" class="inp !w-auto text-sm">${Array.from({length: my.qty + left}, (_, k) => `<option ${k + 1 === my.qty ? 'selected' : ''}>${k + 1}</option>`).join('')}</select>
@@ -939,7 +978,7 @@ async function autofill() {
     try {
       const flat = o => [o, ...(o?.['@graph'] || []), ...(Array.isArray(o) ? o : [])];
       for (const s of d.querySelectorAll('script[type="application/ld+json"]')) {
-        const prod = flat(JSON.parse(s.textContent)).find(o => o && (o['@type'] === 'Product' || o.offers));
+        const prod = flat(JSON.parse(s.textContent)).find(o => o && ([].concat(o['@type']).includes('Product') || o.offers));
         if (!prod) continue;
         E.name.value ||= (prod.name || '').trim();
         const pimg = Array.isArray(prod.image) ? prod.image[0] : prod.image;
@@ -966,6 +1005,15 @@ async function autofill() {
     const price = parseFloat((m('product:price:amount') || m('og:price:amount') || '').replace(/[^\d.]/g, ''));
     if (price) E.price.value ||= price;
     if (E.store.value === host) E.store.value = m('og:site_name') || host;
+  } catch {}
+  // Last network fallback: microlink returns parsed metadata (title, image, publisher) as JSON.
+  if (!E.name.value || !E.image.value) try {
+    const j = await (await fetch('https://api.microlink.io/?url=' + encodeURIComponent(u), {signal: AbortSignal.timeout(9000)})).json();
+    if (j.status === 'success') {
+      E.name.value ||= (j.data.title || '').trim();
+      if (j.data.image?.url) E.image.value ||= j.data.image.url;
+      if (E.store.value === host && j.data.publisher) E.store.value = j.data.publisher;
+    }
   } catch {}
   // Fallback that always works: Etsy and some other stores block scrapers, but the item name is in the link itself.
   E.name.value ||= slugName(u);
