@@ -6,7 +6,7 @@
 <title>Family Wish List</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#c0392b">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
 <link rel="icon" href="icon.svg">
@@ -33,7 +33,7 @@
   .ghost{background:#fff;border:2px solid #f3d9c6;color:#3b1d14} .ghost:hover{border-color:#c0392b}
   .inp{width:100%;border:2px solid #f3d9c6;border-radius:1rem;padding:.6rem .9rem;background:#fff;transition:border-color .2s}
   .inp:focus{outline:none;border-color:#c0392b}
-  .card{background:#fff;border-radius:1.75rem;overflow:hidden;box-shadow:0 4px 14px #3b1d1412;transition:transform .25s,box-shadow .25s}
+  .card{background:#fff;border-radius:1.75rem;overflow:hidden;box-shadow:0 4px 14px #3b1d1412;transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .25s,opacity .35s cubic-bezier(.22,1,.36,1)}
   #grid .card:hover{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 16px 34px #3b1d1426}
   #grid .card img{transition:transform .5s ease}
   #grid .card:hover img{transform:scale(1.06)}
@@ -45,9 +45,9 @@
   .famlink .cnt{margin-left:auto;font-size:.8rem;opacity:.7;white-space:nowrap}
   dialog{border-radius:1.75rem;padding:0;width:min(32rem,94vw);max-height:90vh;color:#3b1d14}
   dialog::backdrop{background:#3b1d1466;backdrop-filter:blur(3px)}
-  dialog[open]{animation:pop .25s ease} @keyframes pop{from{transform:scale(.92);opacity:0}}
+  dialog[open]{animation:sheet-in .28s cubic-bezier(.22,1,.36,1)}
   .fade{animation:fade .35s ease} @keyframes fade{from{opacity:0;transform:translateY(8px)}}
-  .reveal{opacity:0;transform:translateY(26px);transition:opacity .65s cubic-bezier(.22,1,.36,1),transform .65s cubic-bezier(.22,1,.36,1)}
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .35s cubic-bezier(.22,1,.36,1),transform .35s cubic-bezier(.22,1,.36,1)}
   .reveal.in{opacity:1;transform:none}
   @media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none}}
   #treeTx{transition:opacity .35s ease}
@@ -64,7 +64,7 @@
   #menu{display:flex;align-items:center;gap:.5rem}
   @media (max-width:639px){
     #menu{display:none;position:absolute;right:.75rem;top:calc(100% - .25rem);flex-direction:column;align-items:stretch;padding:.75rem;min-width:11rem;background:#fff;border-radius:1.25rem;box-shadow:0 12px 30px #3b1d1433;z-index:20}
-    #menu.open{display:flex}
+    #menu.open{display:flex;animation:drop .18s cubic-bezier(.22,1,.36,1);transform-origin:top right}
   }
   #deer{position:absolute;bottom:.4rem;left:100%;font-size:1.5rem;white-space:nowrap;pointer-events:none;animation:sleigh 40s linear infinite}
   @keyframes sleigh{0%,70%{transform:translateX(0)}100%{transform:translateX(calc(-100vw - 8rem))}}
@@ -99,20 +99,78 @@
   .advdoor:hover{transform:translateY(-2px)}
   .advdoor.locked{opacity:.45;cursor:not-allowed}
   .advdoor.opened{background:#fff !important;color:#c0392b !important}
+  dialog.sheet{margin:auto auto 0;width:min(32rem,100vw);max-width:100vw;max-height:88vh;overflow-y:auto;border-radius:1.75rem 1.75rem 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  dialog.sheet[open]{animation:up .28s cubic-bezier(.22,1,.36,1)} @keyframes up{from{transform:translateY(100%)}}
+  .tag{font-size:.72rem;font-weight:500;padding:.1rem .55rem;border-radius:9999px;background:#fff7ed;border:1px solid #f3d9c6;white-space:nowrap}
+  .badge{font-size:.75rem;font-weight:700;padding:.15rem .6rem;border-radius:9999px;background:#fff;color:#3b1d14;box-shadow:0 2px 6px #3b1d1426}
+  .badge.top{background:#f4c430}
+  details.more>summary{list-style:none} details.more>summary::-webkit-details-marker{display:none}
+  .menuit{text-align:left;padding:.55rem .8rem;border-radius:.6rem;font-weight:500} .menuit:hover{background:#fff7ed}
+  /* ---------- motion (approved ideas 2-10; reference was motion-demo.html) ---------- */
+  :root{--ease:cubic-bezier(.22,1,.36,1)}
+  /* 2. tap feedback: quick press-in, slower release (touchstart listener in JS makes :active fire on iOS) */
+  button,a,summary,.card{-webkit-tap-highlight-color:transparent}
+  .btn:active{transition-duration:.06s} #grid .card:active{transform:scale(.985)}
+  /* 3. view switches slide toward where you're going; 4. cards get names only during add/delete so the rest reflow;
+     8. the selected family pill slides. All driven by vt() in JS. */
+  main{view-transition-name:main}
+  ::view-transition-group(*){animation-duration:.3s;animation-timing-function:var(--ease)}
+  html[data-dir=fwd]{--d:1} html[data-dir=back]{--d:-1}
+  html[data-dir]::view-transition-old(main){animation:.2s var(--ease) both vt-out}
+  html[data-dir]::view-transition-new(main){animation:.3s var(--ease) both vt-in}
+  @keyframes vt-out{to{opacity:0;transform:translateX(calc(var(--d) * -24px))}}
+  @keyframes vt-in{from{opacity:0;transform:translateX(calc(var(--d) * 24px))}}
+  html.reflow #grid .card{view-transition-name:var(--n)}
+  ::view-transition-old(*):only-child{animation:.2s var(--ease) both vt-shrink}
+  ::view-transition-new(*):only-child{animation:.3s var(--ease) both vt-grow}
+  @keyframes vt-shrink{to{opacity:0;transform:scale(.9)}}
+  @keyframes vt-grow{from{opacity:0;transform:scale(.9)}}
+  .famlink.on{view-transition-name:fam-on}
+  /* 5. claim: tick draws, card ring pulses once */
+  .tick{width:1em;height:1em;vertical-align:-.12em;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .tick path{stroke-dasharray:24;stroke-dashoffset:24;animation:draw .3s .05s var(--ease) forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .pulse{animation:ring .7s var(--ease)}
+  @keyframes ring{from{box-shadow:0 0 0 0 #1f6f4a59,0 4px 14px #3b1d1412}to{box-shadow:0 0 0 14px #1f6f4a00,0 4px 14px #3b1d1412}}
+  /* 6. bought: a soft stamp */
+  .stamp{display:inline-block;padding:.35rem .8rem;border-radius:9999px;background:#e8f3ec;color:#1f6f4a;font-weight:700;animation:stamp .3s var(--ease)}
+  @keyframes stamp{from{opacity:0;transform:scale(1.3) rotate(-6deg)}}
+  /* 7. staggered reveal, only for cards that start off-screen */
+  .card.below{opacity:0;transform:translateY(14px)}
+  /* 9. dialogs slide up on open, down on close (closeDlg in JS) */
+  dialog[open]::backdrop{animation:fade-in .28s}
+  dialog.closing{animation:sheet-out .2s var(--ease) forwards} dialog.sheet.closing{animation:sheet-down .22s var(--ease) forwards}
+  dialog.closing::backdrop{animation:fade-in .2s reverse forwards}
+  @keyframes sheet-in{from{opacity:0;transform:translateY(28px)}}
+  @keyframes sheet-out{to{opacity:0;transform:translateY(20px)}}
+  @keyframes sheet-down{to{transform:translateY(100%)}}
+  @keyframes fade-in{from{opacity:0}}
+  /* 10. header shrinks once you scroll, menu drops in, toast rises */
+  #logoTitle{transform-origin:left center;transition:transform .25s var(--ease)}
+  #npLine{display:grid;grid-template-rows:1fr;transition:grid-template-rows .25s var(--ease),opacity .2s}
+  header.small #logoTitle{transform:scale(.82)} #npText{min-height:0;overflow:hidden} header.small #npLine{grid-template-rows:0fr;opacity:0}
+  @keyframes drop{from{opacity:0;transform:translateY(-6px) scale(.96)}}
+  #menuBtn{transition:transform .2s var(--ease)} #menuBtn[aria-expanded=true]{transform:rotate(90deg)}
+  #toast{transition:opacity .25s,transform .25s var(--ease);bottom:calc(1.5rem + env(safe-area-inset-bottom))}
+  #toast.opacity-0{--tw-translate-y:12px}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after,::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){
+    animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important;transition-delay:0s!important}}
   @media print{header,footer,#treeTx,#snowCv,#fireFx,.noprint{display:none !important}}
 </style>
 </head>
 <body class="min-h-screen">
 
+<div id="sentinel" aria-hidden="true" style="position:absolute;top:0;left:0;width:1px;height:60px;pointer-events:none"></div>
 <header class="sticky top-0 z-10 shadow-lg" style="background:linear-gradient(90deg,var(--hdr1),var(--hdr2),var(--hdr1))">
   <div class="max-w-7xl mx-auto px-3 sm:px-4 pt-2.5 pb-1 flex items-center gap-2">
     <h1 id="logoTitle" class="font-xmas text-[1.65rem] leading-tight sm:text-4xl text-white tracking-wide flex-1 min-w-0 truncate cursor-pointer select-none">🎄 Christmas Wish List</h1>
     <div id="who" class="hidden flex items-center gap-2 flex-none">
       <div id="menu">
-        <button id="snowBtn" class="btn ghost text-sm" title="Toggle snowfall">❄️<span class="sm:hidden"> Snow</span></button>
-        <button id="fireBtn" class="btn ghost text-sm" title="Fireplace mode">🔥<span class="sm:hidden"> Fireplace</span></button>
+        <button id="fxBtn" class="btn ghost text-sm" title="Festive mode: snow, lights, fireplace…">🎄<span class="sm:hidden"> Festive</span></button>
         <button id="stashBtn" class="btn ghost text-sm" title="My secret stash: everything I have claimed">🧺 Stash</button>
         <button id="invite" class="btn ghost text-sm">Invite</button>
+        <button id="adminBtn" class="btn ghost text-sm hidden" title="Fix someone's list">🛠 Admin</button>
+        <button id="updBtn" class="btn ghost text-sm" onclick="checkUpdate()" title="Check for a newer version of the app">🔄<span class="sm:hidden"> Check for update</span></button>
         <button id="logout" class="btn ghost text-sm">Sign out</button>
       </div>
       <button id="meAv" onclick="editProfile()" aria-label="Edit profile" class="rounded-full ring-2 ring-amber-300"></button>
@@ -120,7 +178,7 @@
     </div>
   </div>
   <div id="lights" class="flex justify-center gap-2 sm:gap-3 px-2 overflow-hidden" aria-hidden="true"></div>
-  <div id="npLine" class="text-center text-[11px] leading-tight text-white/90 pb-1.5 px-2 truncate"></div>
+  <div id="npLine" class="text-center text-[11px] leading-tight text-white/90 px-2 pb-1.5"><span id="npText" class="truncate"></span></div>
 </header>
 
 <main class="max-w-7xl mx-auto px-4 py-6">
@@ -273,7 +331,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
       </div>
       <div id="advGrid" class="grid grid-cols-5 gap-2 mt-3"></div>
     </div>
-    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    <div id="grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5"></div>
       </div>
     </div>
   </section>
@@ -288,15 +346,40 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
     <p id="stashTotals" class="mb-4 font-semibold"></p>
     <div id="stashList" class="space-y-3"></div>
   </section>
+
+  <section id="adminView" class="hidden">
+    <div class="flex flex-wrap items-center gap-3 mb-5">
+      <h2 class="font-xmas text-4xl sm:text-5xl flex-1 basis-full sm:basis-0">🛠 Fix someone's list</h2>
+      <button class="btn red" onclick="show('listView'); route()">← Back to lists</button>
+    </div>
+    <div class="card p-4 space-y-3 mb-5">
+      <select id="admWho" class="inp" aria-label="Whose list" onchange="loadAdmin()"></select>
+      <div class="flex gap-2">
+        <input id="admName" maxlength="60" class="inp flex-1 min-w-0" aria-label="Display name" placeholder="Display name">
+        <button class="btn ghost flex-none" onclick="saveAdmName()">Save name</button>
+      </div>
+    </div>
+    <div class="flex justify-end mb-3"><button class="btn red" onclick="openItem()">+ Add wish for them</button></div>
+    <div id="admList" class="space-y-3"></div>
+  </section>
   <footer class="reveal rv-t relative overflow-hidden text-center text-sm pb-12 pt-4"><span class="opacity-60">Made with ❤️ for the family · 🎄 Merry Christmas 🎁</span><button id="orn" type="button" aria-label="Ornament"></button><span id="deer" aria-hidden="true">🦌🦌🛷</span></footer>
 </main>
 
-<dialog id="itemDlg"><form id="itemForm" class="p-6 space-y-3">
+<dialog id="itemDlg" class="sheet"><form id="itemForm" class="p-5 space-y-3" novalidate>
   <h3 class="font-xmas text-3xl outline-none" tabindex="-1" autofocus>Your wish ✨</h3>
-  <input name="url" type="url" placeholder="Paste store link to auto-fill" aria-label="Store link" class="inp">
-  <input name="name" required placeholder="What is it?" aria-label="Name" class="inp">
+  <div class="flex gap-2">
+    <input name="url" inputmode="url" autocomplete="off" placeholder="Paste a store link" aria-label="Store link" class="inp flex-1 min-w-0">
+    <!-- no `capture` attribute: on iPhone it forces camera-only; without it iOS offers Take Photo or Photo Library -->
+    <label class="btn green cursor-pointer flex-none grid place-items-center" aria-label="Take or upload a photo">📸<input id="photoFile" type="file" accept="image/*" class="hidden"></label>
+  </div>
+  <div class="flex gap-3 items-center">
+    <div id="pv" class="w-24 h-24 flex-none rounded-2xl overflow-hidden bg-gradient-to-br from-red-50 to-amber-50 grid place-items-center text-4xl">🎁</div>
+    <p id="pvName" class="font-semibold leading-tight line-clamp-3"></p>
+  </div>
+  <details id="more"><summary class="cursor-pointer font-semibold text-sm py-1">More details</summary><div class="space-y-3 mt-2">
+  <input name="name" placeholder="What is it?" aria-label="Name" class="inp">
   <input name="image" type="url" placeholder="Image URL" aria-label="Image URL" class="inp">
-  <p class="text-xs opacity-60 -mt-1">No photo? On the store page, right-click the picture, choose Copy Image Address, and paste it here. Etsy blocks automatic photo lookup.</p>
+  <p class="text-xs opacity-60 -mt-1">Wrong picture? Tap 📸, or paste a picture link here.</p>
   <div class="grid grid-cols-2 gap-3">
     <input name="store" placeholder="Store" aria-label="Store" class="inp">
     <input name="price" type="number" step="0.01" min="0" placeholder="Price" aria-label="Price" class="inp">
@@ -310,9 +393,10 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
         <option value="5">★★★★★ Dream gift</option>
       </select></label>
   </div>
-  <textarea name="notes" rows="2" placeholder="Size, color, notes" aria-label="Notes" class="inp"></textarea>
+  <textarea name="notes" rows="2" placeholder="Notes, e.g. size M, color blue" aria-label="Notes" class="inp"></textarea>
+  </div></details>
   <div class="flex gap-2 justify-end">
-    <button type="button" class="btn ghost" onclick="itemDlg.close()">Cancel</button>
+    <button type="button" class="btn ghost" onclick="closeDlg(itemDlg)">Cancel</button>
     <button class="btn red">Save</button>
   </div>
 </form></dialog>
@@ -334,8 +418,13 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
       <button type="button" class="btn ghost text-xs" onclick="setSkin('midnight')">🌌 Night</button>
     </div>
   </div>
+  <label class="flex items-center justify-between gap-3 text-sm font-semibold">
+    <span>🔄 Check for app updates when I open it <span class="font-normal opacity-70">(this device)</span></span>
+    <input type="checkbox" switch id="autoUpd" class="scale-125 flex-none"
+      onchange="try { localStorage.autoUpdate = this.checked ? 'on' : 'off'; } catch {}">
+  </label>
   <div class="flex gap-2">
-    <button type="button" class="btn ghost flex-1" onclick="me && profDlg.close()">Close</button>
+    <button type="button" class="btn ghost flex-1" onclick="me && closeDlg(profDlg)">Close</button>
     <button class="btn red flex-1">Save</button>
   </div>
 </form></dialog>
@@ -343,7 +432,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
 <dialog id="shareDlg"><div class="p-6 space-y-3">
   <h3 class="font-xmas text-3xl">Share 🎁</h3>
   <div id="shareLinks" class="grid grid-cols-2 gap-2"></div>
-  <button class="btn ghost w-full" onclick="shareDlg.close()">Close</button>
+  <button class="btn ghost w-full" onclick="closeDlg(shareDlg)">Close</button>
 </div></dialog>
 
 <dialog id="thanksDlg"><form id="thanksForm" class="p-6 space-y-3">
@@ -357,7 +446,15 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
 <dialog id="advDlg"><div class="p-6 space-y-3 text-center">
   <h3 id="advTitle" class="font-xmas text-3xl"></h3>
   <div id="advBody" class="space-y-2"></div>
-  <button class="btn red w-full" onclick="advDlg.close()">Close</button>
+  <button class="btn red w-full" onclick="closeDlg(advDlg)">Close</button>
+</div></dialog>
+
+<dialog id="sheet" class="sheet"><div id="sheetBody" class="p-5 space-y-3"></div></dialog>
+
+<dialog id="fxDlg" class="sheet"><div class="p-5 space-y-3">
+  <label class="flex items-center justify-between font-xmas text-3xl">🎄 Festive mode <input type="checkbox" switch id="fxAll" class="scale-125"></label>
+  <div id="fxList" class="space-y-2"></div>
+  <button class="btn red w-full" onclick="closeDlg(fxDlg)">Done</button>
 </div></dialog>
 
 <div id="fireFx" aria-hidden="true"></div>
@@ -395,6 +492,9 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const safe = u => /^https?:\/\/./i.test(u || '') ? u : '';
 const BASE = location.origin + location.pathname;
+// RELEASE: change this on every deploy (any new text works; today's date is easiest).
+// Open apps compare it with the live copy and offer "Update now" when it differs.
+const APP_VERSION = '2026-11-26';
 const FAMILY = 'f1111111-1111-1111-1111-111111111111'; // one single family for everyone
 const DESIRE = ['', 'Nice to have', 'Would like', 'Really want', 'Love it!', 'Dream gift'];
 let uid = undefined, me = null, fam = [], items = [], shareUrl = '', routeN = 0;
@@ -429,30 +529,92 @@ if (pfParams.get('prefill')) {
 }
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
-function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.classList.remove('opacity-0');
-  clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.add('opacity-0'), 2800);
+// toast(msg, undo): with undo, shows an Undo button for 5s; the action runs only if they tap it.
+// label/ms rename the button and stretch the time (the update offer uses 'Update now').
+function toast(msg, undo, label = 'Undo', ms = 5000) {
+  const t = $('#toast'), hide = () => { t.classList.add('opacity-0', 'pointer-events-none'); };
+  t.textContent = msg; t.classList.remove('opacity-0');
+  t.classList.toggle('pointer-events-none', !undo);
+  if (undo) {
+    const b = document.createElement('button'); b.className = 'underline font-bold ml-3'; b.textContent = label;
+    b.onclick = () => { undo(); hide(); }; t.append(b);
+  }
+  clearTimeout(t.timer); t.timer = setTimeout(hide, undo ? ms : 2800);
 }
-function show(view) {
-  const fromAuth = view === 'listView' && !$('#authView').classList.contains('hidden');
-  for (const v of ['authView', 'listView', 'stashView']) $('#' + v).classList.toggle('hidden', v !== view);
-  $('#who').classList.toggle('hidden', view === 'authView');
+
+// ---------- app updates ----------
+// Fetch the live page (no-cache: also refreshes the browser's stored copy, so a reload lands on it)
+// and compare its APP_VERSION with ours. quiet = the automatic check: only speak up if there is news.
+async function checkUpdate(quiet) {
+  let v;
+  try {
+    const r = await fetch(location.pathname, {cache: 'no-cache'});
+    if (!r.ok) throw 0;
+    v = (await r.text()).match(/const APP_VERSION = '([^']*)'/)?.[1];
+  } catch { if (!quiet) toast("Couldn't check for updates. Are you online?"); return; }
+  if (v && v !== APP_VERSION) toast('🎁 A new version of the app is ready', () => location.reload(), 'Update now', 15000);
+  else if (!quiet) toast(`You have the latest version ✨ (${APP_VERSION})`);
+}
+const autoUpdate = () => { try { return localStorage.autoUpdate !== 'off'; } catch { return true; } };
+// On open, and whenever the app comes back to the front: phones resume a home-screen app without reloading it.
+$('#autoUpd').checked = autoUpdate(); // the on/off switch lives in the profile dialog
+if (autoUpdate()) checkUpdate(true);
+document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && autoUpdate() && checkUpdate(true));
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+document.addEventListener('touchstart', () => {}, {passive: true}); // makes :active fire on iOS Safari
+// One helper for every animated DOM swap. Fetch data BEFORE calling it: the page freezes until update() returns.
+function vt(update, {reflow = false, dir} = {}) {
+  if (!document.startViewTransition || RM.matches) return update();
+  const h = document.documentElement;
+  h.classList.toggle('reflow', reflow);
+  if (dir) h.dataset.dir = dir;
+  document.startViewTransition(update).finished.finally(() => { h.classList.remove('reflow'); delete h.dataset.dir; });
+}
+// Dialogs slide out before they close.
+function closeDlg(d) {
+  return new Promise(res => {
+    if (!d.open) return res();
+    if (RM.matches) { d.close(); return res(); }
+    d.classList.add('closing');
+    setTimeout(() => { d.classList.remove('closing'); d.close(); res(); }, 220);
+  });
+}
+// Every view switch goes through here; fill() renders the new view inside the same transition.
+const VIEWS = ['authView', 'listView', 'stashView', 'adminView'];
+function show(view, fill) {
+  const cur = VIEWS.find(v => !$('#' + v).classList.contains('hidden')), fromAuth = view === 'listView' && cur === 'authView';
+  const swap = () => {
+    for (const v of VIEWS) $('#' + v).classList.toggle('hidden', v !== view);
+    $('#who').classList.toggle('hidden', view === 'authView');
+    fill?.();
+  };
+  if (!cur || cur === view || fromAuth) swap();
+  else vt(swap, {dir: VIEWS.indexOf(view) > VIEWS.indexOf(cur) ? 'fwd' : 'back'});
   if (fromAuth) treeTransition();
 }
+new IntersectionObserver(([e]) => $('header').classList.toggle('small', !e.isIntersecting)).observe($('#sentinel'));
 
 // ---------- scroll reveal + tree-building page transition ----------
 const seenCards = new Set();
-const io = new IntersectionObserver(es => es.forEach(en => {
-  const el = en.target;
-  if (el.classList.contains('rv-t')) { el.classList.toggle('in', en.isIntersecting); return; }
-  if (en.isIntersecting) {
-    el.classList.add('in');
-    if (el.dataset.cid) seenCards.add(el.dataset.cid);
-    io.unobserve(el);
-    setTimeout(() => el.classList.remove('reveal'), 750);
+const io = new IntersectionObserver(es => {
+  let k = 0;
+  for (const en of es) {
+    const el = en.target;
+    if (el.classList.contains('rv-t')) { el.classList.toggle('in', en.isIntersecting); continue; }
+    if (el.dataset.cid) {
+      // Cards: only ones that START off-screen get hidden, so nothing on screen ever blinks; they rise in a short stagger.
+      if (!en.isIntersecting) { if (!seenCards.has(el.dataset.cid)) el.classList.add('below'); continue; }
+      seenCards.add(el.dataset.cid); io.unobserve(el);
+      if (el.classList.contains('below')) {
+        el.style.transitionDelay = Math.min(k++, 4) * 50 + 'ms'; el.classList.remove('below');
+        setTimeout(() => el.style.transitionDelay = '', 600);
+      }
+      continue;
+    }
+    if (en.isIntersecting) { el.classList.add('in'); io.unobserve(el); setTimeout(() => el.classList.remove('reveal'), 400); }
   }
-}), {threshold: .1});
-function watchReveals() { document.querySelectorAll('.reveal:not(.in)').forEach(el => io.observe(el)); }
+}, {threshold: .1});
+function watchReveals() { document.querySelectorAll('.reveal:not(.in), #grid .card').forEach(el => io.observe(el)); }
 
 const TX_MSGS = ['Decorating the tree…', 'Hanging the ornaments…', 'Untangling the lights…', 'Placing the star…', 'Fluffing the branches…'];
 let txBusy = false, shownOwner = null;
@@ -482,7 +644,7 @@ function gifts() {
 // ---------- phase 3: snowfall, season bar, easter eggs ----------
 let snowing = false, heavy = false, sctx = null, flakes = [], sraf = 0;
 function toggleSnow(on = !snowing) {
-  snowing = on; localStorage.snow = on ? 'on' : 'off';
+  snowing = on;
   cancelAnimationFrame(sraf); // never run two loops
   let cv = $('#snowCv');
   // Canvas is CSS-sized to the viewport (100%/100%) and its pixels follow, so the drift always sits at the real bottom on iOS.
@@ -516,11 +678,27 @@ function toggleSnow(on = !snowing) {
   };
   tick();
 }
-$('#snowBtn').onclick = () => toggleSnow();
-$('#fireBtn').onclick = () => {
-  document.body.classList.toggle('fire');
-  localStorage.fire = document.body.classList.contains('fire') ? 'on' : 'off';
-};
+// Festive mode: every decoration on by default, each with its own switch, all behind one master switch.
+const FX = {snow: '❄️ Snow', lights: '💡 Lights', fire: '🔥 Fireplace glow', frost: '🧊 Window frost', sleigh: '🦌 Reindeer sleigh', night: '🌙 Evening colors'};
+let fx = {};
+try { fx = JSON.parse(localStorage.fx || '{}'); } catch {}
+const fxOn = k => fx.all !== false && fx[k] !== false;
+function applyFx() {
+  try { localStorage.fx = JSON.stringify(fx); } catch {}
+  const hr = new Date().getHours();
+  toggleSnow(fxOn('snow') && !matchMedia('(prefers-reduced-motion: reduce)').matches);
+  $('#lights').classList.toggle('hidden', !fxOn('lights'));
+  document.body.classList.toggle('fire', fxOn('fire'));
+  $('#deer').classList.toggle('hidden', !fxOn('sleigh'));
+  document.body.classList.toggle('night', fxOn('night') && (hr >= 18 || hr < 6));
+  $('#fxAll').checked = fx.all !== false;
+  $('#fxList').innerHTML = Object.entries(FX).map(([k, label]) => `<label class="flex items-center justify-between font-semibold ${fx.all === false ? 'opacity-40' : ''}">${label}
+    <input type="checkbox" switch class="scale-125" ${fx[k] !== false ? 'checked' : ''} ${fx.all === false ? 'disabled' : ''} onchange="fx['${k}']=this.checked;applyFx()"></label>`).join('');
+}
+$('#fxAll').onchange = e => { fx.all = e.target.checked; applyFx(); };
+$('#fxBtn').onclick = () => $('#fxDlg').showModal();
+// Bottom sheets close on a tap outside them.
+for (const d of document.querySelectorAll('dialog.sheet')) d.addEventListener('click', e => e.target === d && closeDlg(d));
 
 function season() {
   const now = new Date(), bar = $('#seasonBar');
@@ -541,7 +719,10 @@ const setMenu = open => { menu.classList.toggle('open', open); menuBtn.setAttrib
 menuBtn.onclick = () => setMenu(!menu.classList.contains('open'));
 menu.onclick = () => setMenu(false); // picked an item
 // pointerdown, not click: iOS Safari sends no click for taps on plain content, so the menu never closed.
-addEventListener('pointerdown', e => { if (!e.target.closest('#menu,#menuBtn')) setMenu(false); });
+addEventListener('pointerdown', e => {
+  if (!e.target.closest('#menu,#menuBtn')) setMenu(false);
+  for (const d of document.querySelectorAll('details.more[open]')) if (!d.contains(e.target)) d.open = false;
+});
 
 // Easter egg 1: triple-click (or triple-tap) the title for a snowfall flurry.
 let titleClicks = 0, titleTimer = 0;
@@ -612,11 +793,11 @@ function editProfile() {
 }
 
 // Photo upload: pick a picture, it is cropped square, stored in the avatars bucket, and the link fills itself in.
-async function squareBlob(file) {
+async function squareBlob(file, n = 512) {
   const bmp = await createImageBitmap(file);
   const s = Math.min(bmp.width, bmp.height), c = document.createElement('canvas');
-  c.width = c.height = 512;
-  c.getContext('2d').drawImage(bmp, (bmp.width - s) / 2, (bmp.height - s) / 2, s, s, 0, 0, 512, 512);
+  c.width = c.height = n;
+  c.getContext('2d').drawImage(bmp, (bmp.width - s) / 2, (bmp.height - s) / 2, s, s, 0, 0, n, n);
   return new Promise(r => c.toBlob(r, 'image/jpeg', .85));
 }
 $('#avatarFile').onchange = async e => {
@@ -644,7 +825,7 @@ $('#profForm').onsubmit = async e => {
   const {data, error} = await sb.from('profiles').upsert(row).select().single();
   if (error) return toast(error.message);
   delete localStorage.join; me = data;
-  $('#profDlg').close(); start();
+  closeDlg($('#profDlg')); start();
 };
 
 // ---------- lists ----------
@@ -653,27 +834,23 @@ async function start() {
   if (error) return toast(error.message);
   fam = [me, ...data.filter(p => p.id !== uid)];
   $('#meAv').innerHTML = av(me, 'w-11 h-11');
-  show('listView'); route(); checkPrefill(); season();
-  if (localStorage.snow !== 'off'
-      && !matchMedia('(prefers-reduced-motion: reduce)').matches) toggleSnow(true);
+  show('listView'); route(); checkPrefill(); season(); applyFx(); goLive();
+  sb.rpc('is_admin').then(({data}) => $('#adminBtn')?.classList.toggle('hidden', data !== true)); // admin.sql enforces it; this only shows the door
   // North Pole weather line (idea 10): deterministic per day.
   const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
   const COND = ['light snow', 'heavy snow', 'blizzarding', 'crisp and clear', 'aurora overhead', 'foggy, Rudolph on duty'];
   const RST = ['grounded until the 24th', 'doing practice laps', 'warming up', 'on a cookie break'];
-  $('#npLine').textContent = `North Pole: ${-4 - (doy * 7) % 18}°, ${COND[doy % COND.length]} · reindeer ${RST[doy % RST.length]}`;
-  // Day and night (idea 5): evenings go cozy-dark and the lights glow harder.
-  const hr = new Date().getHours();
-  document.body.classList.toggle('night', hr >= 18 || hr < 6);
-  if (localStorage.fire === 'on') document.body.classList.add('fire');
+  $('#npText').textContent = `North Pole: ${-4 - (doy * 7) % 18}°, ${COND[doy % COND.length]} · reindeer ${RST[doy % RST.length]}`;
+  // Day and night (idea 5) and the fireplace live in applyFx().
   // Window frost on first load of the session (idea 7).
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!sessionStorage.frosted && !reduced) {
+  if (!sessionStorage.frosted && !reduced && fxOn('frost')) {
     sessionStorage.frosted = '1';
     const fr = $('#frost'); fr.classList.remove('hidden');
     setTimeout(() => { fr.style.opacity = '0'; setTimeout(() => fr.remove(), 3000); }, 600);
   }
   // House lights chase sequence every few seconds (idea 3).
-  if (!reduced) setInterval(() => {
+  if (!reduced && !start.chase) start.chase = setInterval(() => {
     const L = $('#lights');
     L.classList.remove('chase'); void L.offsetWidth; L.classList.add('chase');
     setTimeout(() => L.classList.remove('chase'), 1100);
@@ -692,6 +869,7 @@ function checkPrefill() {
   E.image.value = p.image || '';
   E.store.value = p.store || '';
   if (p.price) E.price.value = parseFloat(p.price) || '';
+  pv();
   toast('Filled from the store page ✨ Check it and Save.');
   // Shares from a phone often carry only the link; run the normal lookup to fill the rest.
   if (!p.name && p.url) { E.url.dataset.done = ''; autofill(); }
@@ -714,8 +892,7 @@ $('#pickBtn').onclick = () => {
 // ---------- idea 1: the family tree decorates itself ----------
 // Claims on your own items come back empty under RLS, so this total can
 // never leak what was claimed for you. It counts everyone else's lists.
-async function renderTree() {
-  const {data} = await sb.from('items').select('claims(qty)');
+function renderTree(data) {
   const total = (data || []).reduce((s, i) => s + i.claims.reduce((a, c) => a + c.qty, 0), 0);
   $('#famTree').classList.remove('hidden');
   $('#famTreeTxt').textContent = total
@@ -812,15 +989,16 @@ $('#thanksForm').onsubmit = async e => {
   const E = e.target.elements;
   const {error} = await sb.rpc('send_thanks', {p_claim_id: +E.claim.value, p_message: E.message.value.trim()});
   if (error) return toast(error.message);
-  $('#thanksDlg').close(); toast('Thanks sent 💌'); gifts(); renderThanks();
+  closeDlg($('#thanksDlg')); toast('Thanks sent 💌'); gifts(); renderThanks();
 };
 
 // ---------- idea 29: my secret stash ----------
 async function openStash() {
-  show('stashView');
   const {data, error} = await sb.from('claims').select('*, items(*)').eq('user_id', uid).order('created_at', {ascending: false});
   if (error) return toast(error.message);
-  const rows = data || [];
+  show('stashView', () => fillStash(data || []));
+}
+function fillStash(rows) {
   const spent = rows.filter(c => c.bought).reduce((s, c) => s + (c.items?.price || 0) * c.qty, 0);
   const promised = rows.reduce((s, c) => s + (c.items?.price || 0) * c.qty, 0);
   $('#stashTotals').textContent = rows.length
@@ -833,16 +1011,19 @@ async function openStash() {
         <p class="font-semibold truncate">${esc(it.name || 'Wish')}</p>
         <p class="text-sm opacity-70">for ${esc(owner?.name || '…')}${it.price ? ` · $${Number(it.price).toFixed(2)}` : ''} · qty ${c.qty}${it.url && safe(it.url) ? ` · <a class="underline" target="_blank" rel="noopener" href="${esc(it.url)}">store page</a>` : ''}</p>
       </div>
-      ${c.bought ? '<span class="chip bought">✓ Bought</span>' : `<button class="btn green text-sm noprint" onclick="markBought(${c.id}).then(openStash)">Mark bought</button>`}
+      ${c.bought ? '<span class="chip bought">✓ Bought</span>' : `<button class="btn green text-sm noprint" onclick="markBought(${c.id}, this, openStash)">Mark bought</button>`}
       <button class="btn ghost text-sm noprint" onclick="unclaim(${c.id}).then(openStash)">Unclaim</button>
     </div>`;
   }).join('') || '<p class="text-center py-10 opacity-70">Nothing claimed yet. Your stash is empty. 🧺</p>';
 }
 $('#stashBtn').onclick = openStash;
 
-async function route() {
+let curMine = true; // is the shown list my own? (paint + live refresh read it)
+const gone = new Set(); // wishes deleted but still inside their Undo window
+async function route({reflow = false} = {}) {
   const n = ++routeN;
   const p = fam.find(x => x.id === new URLSearchParams(location.hash.slice(1)).get('u')) || me, mine = p.id === uid;
+  curMine = mine;
   $('#listTitle').textContent = mine ? 'My wish list' : `${p.name}'s wish list`;
   $('#addBtn').classList.toggle('hidden', !mine);
   $('#bmBar').classList.toggle('hidden', !mine);
@@ -854,69 +1035,129 @@ async function route() {
   if (n !== routeN) return; // a newer route() won
   if (error) return toast(error.message);
   items = data;
-  const {data: allItems} = await sb.from('items').select('owner');
+  const {data: allItems} = await sb.from('items').select('owner, qty, claims(qty)');
   if (n !== routeN) return;
-  const counts = {};
-  for (const r of allItems || []) counts[r.owner] = (counts[r.owner] || 0) + 1;
+  const counts = {}, open = {};
+  for (const r of allItems || []) {
+    counts[r.owner] = (counts[r.owner] || 0) + 1;
+    if (leftOf(r) > 0) open[r.owner] = (open[r.owner] || 0) + 1;
+  }
   // Stockings (idea 2): how many gifts each person has claimed for others.
   const {data: allClaims} = await sb.from('claims').select('user_id, qty');
   if (n !== routeN) return;
   const gave = {};
   for (const c of allClaims || []) gave[c.user_id] = (gave[c.user_id] || 0) + c.qty;
-  $('#famList').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="famlink ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}<span>${f.id === uid ? 'My list' : esc(f.name)}</span><span class="stk" title="Gifts claimed for others">🧦 ${gave[f.id] || 0}</span><span class="cnt">${counts[f.id] || 0} wish${counts[f.id] === 1 ? '' : 'es'}</span></a>`).join('');
-  $('#grid').innerHTML = items.map((i, ix) => card(i, mine, ix)).join('') ||
-    `<div class="col-span-full text-center py-16 space-y-3"><div class="text-6xl animate-bounce">${mine ? '🎁' : '🎄'}</div><p class="text-lg opacity-70">${mine ? 'Your list is empty. Add your first wish! ✨' : 'Nothing here yet. Check back soon!'}</p></div>`;
-  watchReveals();
-  if (shownOwner && shownOwner !== p.id) treeTransition();
+  // "N still unclaimed" only for others: your own claims are hidden from you, so it would always read as all-unclaimed.
+  const draw = () => { $('#famList').innerHTML = fam.map(f => `<a href="#u=${f.id}" class="famlink ${f.id === p.id ? 'on' : ''}">${av(f, 'w-8 h-8')}<span>${f.id === uid ? 'My list' : esc(f.name)}</span><span class="stk" title="Gifts claimed for others">🧦 ${gave[f.id] || 0}</span><span class="cnt">${
+    f.id === uid ? `${counts[f.id] || 0} wish${counts[f.id] === 1 ? '' : 'es'}` : !counts[f.id] ? 'no wishes yet' : open[f.id] ? `${open[f.id]} still unclaimed` : 'all claimed 🎉'}</span></a>`).join(''); paint(); };
+  const moved = shownOwner && shownOwner !== p.id;
+  moved || reflow ? vt(draw, {reflow}) : draw();
+  if (moved) treeTransition();
   shownOwner = p.id;
-  renderTree(); renderAdv(); renderThanks();
+  renderTree(allItems); renderAdv(); renderThanks();
 }
 
-// No photo, or a photo link that fails to load: a shorter box with a centered gift instead of a big empty square.
+// The one place the grid is written (motion ideas can wrap this).
+// Sections by desire; for givers, fully claimed wishes sink into a last section.
+const leftOf = i => i.qty - i.claims.reduce((s, c) => s + c.qty, 0);
+const SECT = d => d >= 5 ? 'Most wanted' : d === 4 ? 'Really want' : d === 3 ? 'Would like' : 'Also nice';
+function paint() {
+  const list = items.filter(i => !gone.has(i.id));
+  if (!curMine) list.sort((a, b) => (leftOf(a) <= 0) - (leftOf(b) <= 0)); // stable: desire order kept inside each group
+  let last = '';
+  $('#grid').innerHTML = list.map(i => {
+    const s = !curMine && leftOf(i) <= 0 ? '🎉 Already claimed' : SECT(i.desire);
+    return (s !== last ? `<h3 class="col-span-full font-xmas text-3xl -mb-1 ${last ? 'mt-3' : ''}">${last = s}</h3>` : '') + card(i, curMine);
+  }).join('') ||
+    `<div class="col-span-full text-center py-16 space-y-3"><div class="text-6xl animate-bounce">${curMine ? '🎁' : '🎄'}</div><p class="text-lg opacity-70">${curMine ? 'Your list is empty. Add your first wish! ✨' : 'Nothing here yet. Check back soon!'}</p></div>`;
+  watchReveals();
+}
+
+// No photo, or a photo link that fails to load: a centered gift instead of an empty box.
 const GIFT = '<span class="text-6xl cursor-pointer" title="Psst… click me" onclick="this.classList.remove(\'wiggle\');void this.offsetWidth;this.classList.add(\'wiggle\');snow()">🎁</span>';
-function noImg(el) { el.parentElement.classList.replace('aspect-square', 'aspect-[4/3]'); el.outerHTML = GIFT; }
-function card(i, mine, ix = 0) {
-  const got = i.claims.reduce((s, c) => s + c.qty, 0), left = i.qty - got;
-  const img = safe(i.image)
-    ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover" onerror="noImg(this)">`
-    : GIFT;
-  const sm = 'btn text-sm';
-  return `<article id="item${i.id}" data-cid="${i.id}" class="card reveal ${seenCards.has(i.id) ? 'in' : ''} flex flex-col relative">
-    ${!mine && left <= 0 ? '<span class="absolute top-4 -right-9 rotate-45 bg-[#1f6f4a] text-white text-xs font-bold px-9 py-1 shadow z-10">Wrapped up!</span>' : ''}
-    <div class="${safe(i.image) ? 'aspect-square' : 'aspect-[4/3]'} bg-gradient-to-br from-red-50 to-amber-50 grid place-items-center overflow-hidden">${img}</div>
-    <div class="p-4 flex flex-col gap-2 flex-1">
-      <div class="flex items-start gap-2">
-        <h3 class="text-xl font-semibold flex-1 leading-tight">${esc(i.name)}</h3>
-        ${i.price ? `<span class="font-bold text-[#1f6f4a]">$${(+i.price).toFixed(2)}</span>` : ''}
+function noImg(el) { el.outerHTML = GIFT; }
+// The picture. Tapping it opens the product page; the rest of the card opens the detail sheet.
+function pic(i) {
+  const box = 'aspect-square w-full bg-gradient-to-br from-red-50 to-amber-50 grid place-items-center overflow-hidden';
+  const inner = safe(i.image) ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy" class="w-full h-full object-cover" onerror="noImg(this)">`
+    : i.url && (i.img_tries ?? 9) < 5 ? '<span class="text-sm opacity-60 animate-pulse text-center px-2">🔎 finding picture…</span>' : GIFT;
+  return safe(i.url) ? `<a href="${esc(i.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="${box}" aria-label="Open ${esc(i.name)} in the store">${inner}</a>` : `<div class="${box}">${inner}</div>`;
+}
+const badges = i => [i.desire >= 5 && '⭐ Top pick', i.qty > 1 && `Wants ${i.qty}`].filter(Boolean);
+// Size and color tags pulled from notes ("size M", "sz 10.5", "color navy blue", "any color").
+function chips(notes) {
+  notes ||= '';
+  const out = [], sz = notes.match(/\b(?:size|sz)\s*[:=-]?\s*([a-z0-9][\w.\/]*)/i);
+  if (sz) out.push('Size ' + sz[1].toUpperCase());
+  if (/\bany colou?r\b/i.test(notes)) out.push('Any color');
+  else {
+    const c = notes.match(/\bcolou?r\s*[:=-]?\s*((?:light|dark|navy|pale|baby|hot|bright|forest|sky|royal)\s+)?([a-z]+)/i);
+    if (c) out.push(((c[1] || '') + c[2]).toLowerCase());
+  }
+  return out;
+}
+function card(i, mine) {
+  const left = leftOf(i), done = !mine && left <= 0;
+  const tags = [...chips(i.notes), !mine && left > 0 && left < i.qty && `${left} left`].filter(Boolean);
+  return `<article id="item${i.id}" data-cid="${i.id}" class="card flex flex-col relative cursor-pointer" style="--n:c${i.id}" onclick="openSheet(${i.id})">
+    ${done ? '<span class="absolute top-4 -right-9 rotate-45 bg-[#1f6f4a] text-white text-xs font-bold px-9 py-1 shadow z-10">Wrapped up!</span>' : ''}
+    <div class="absolute top-2 left-2 z-10 flex flex-col items-start gap-1 pointer-events-none">${badges(i).map(b => `<span class="badge ${b.includes('Top') ? 'top' : ''}">${b}</span>`).join('')}</div>
+    ${pic(i)}
+    <div class="p-3 flex flex-col gap-1.5 flex-1">
+      <h3 class="font-semibold leading-tight line-clamp-2">${esc(i.name)}</h3>
+      ${tags.length ? `<div class="flex flex-wrap gap-1">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+      <div class="flex items-center mt-auto">
+        <span class="font-bold text-[#1f6f4a] mr-auto">${i.price ? `$${(+i.price).toFixed(2)}` : ''}</span>
+        <details class="more relative" onclick="event.stopPropagation()">
+          <summary class="w-9 h-9 -m-1 grid place-items-center rounded-full cursor-pointer text-xl leading-none hover:bg-orange-50" aria-label="More actions">⋯</summary>
+          <div class="absolute right-0 bottom-full mb-1 bg-white rounded-xl shadow-lg p-1 flex flex-col z-20 min-w-[7.5rem] text-sm" onclick="this.parentElement.open=false">
+            <button class="menuit" onclick="shareItem(${i.id})">↗ Share</button>
+            ${mine ? `<button class="menuit" onclick="openItem(${i.id})">✏️ Edit</button><button class="menuit text-[#c0392b]" onclick="delItem(${i.id})">🗑 Delete</button>` : ''}
+          </div>
+        </details>
       </div>
-      <div class="text-sm"><span class="text-amber-500">${'★'.repeat(i.desire)}${'☆'.repeat(5 - i.desire)}</span> ${DESIRE[i.desire]}</div>
-      <div class="text-sm opacity-70">${[esc(i.store), `wants ${i.qty}`].filter(Boolean).join(' · ')}</div>
-      ${i.notes ? `<p class="text-sm bg-orange-50 rounded-xl px-3 py-2">${esc(i.notes)}</p>` : ''}
-      <div class="flex flex-wrap gap-2 mt-auto pt-2">
-        ${safe(i.url) ? `<a href="${esc(i.url)}" target="_blank" rel="noopener" class="${sm} green">View / buy</a>` : ''}
-        <button onclick="shareItem(${i.id})" class="${sm} ghost">Share</button>
-        ${mine ? `<button onclick="openItem(${i.id})" class="${sm} ghost">Edit</button>
-                  <button onclick="delItem(${i.id})" class="${sm} ghost">Delete</button>` : ''}
-      </div>
-      ${mine ? '' : claimBox(i, got, left)}
     </div></article>`;
+}
+
+// Detail sheet: everything the card leaves out, plus claiming.
+function openSheet(id) {
+  const i = items.find(x => x.id === id);
+  if (!i) return;
+  const mine = i.owner === uid, left = leftOf(i);
+  $('#sheetBody').innerHTML = `
+    <div class="flex gap-4 items-start">
+      <div class="w-28 flex-none rounded-2xl overflow-hidden">${pic(i)}</div>
+      <div class="min-w-0 flex-1 space-y-1">
+        <h3 class="text-xl font-semibold leading-tight">${esc(i.name)}</h3>
+        <p class="text-sm opacity-70">${[i.price && `$${(+i.price).toFixed(2)}`, esc(i.store), DESIRE[i.desire]].filter(Boolean).join(' · ')}</p>
+        <div class="flex flex-wrap gap-1.5">${[...badges(i), ...chips(i.notes)].map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+      </div>
+    </div>
+    ${i.notes ? `<p class="text-sm bg-orange-50 rounded-xl px-3 py-2 whitespace-pre-line">${esc(i.notes)}</p>` : ''}
+    <div class="flex flex-wrap gap-2">
+      ${safe(i.url) ? `<a href="${esc(i.url)}" target="_blank" rel="noopener" class="btn green flex-1 text-center">View / buy</a>` : ''}
+      ${mine ? `<button class="btn ghost flex-1" onclick="closeDlg(sheet).then(() => openItem(${i.id}))">Edit</button>` : ''}
+      <button class="btn ghost flex-1" onclick="closeDlg(sheet)">Close</button>
+    </div>
+    ${mine ? '' : claimBox(i, i.qty - left, left)}`;
+  $('#sheet').showModal();
 }
 
 function claimBox(i, got, left) {
   const my = i.claims.find(c => c.user_id === uid), sm = 'btn text-sm';
   return `<div class="border-t border-orange-100 pt-3 mt-1 space-y-2">
-    ${got ? `<div class="h-2 rounded-full bg-orange-100 overflow-hidden"><div class="h-full claimbar rounded-full transition-all duration-500" style="width:${Math.round(got / i.qty * 100)}%"></div></div>` : ''}
+    <div class="h-2 rounded-full bg-orange-100 overflow-hidden"><div class="h-full claimbar rounded-full transition-all duration-500" style="width:${Math.round(got / i.qty * 100)}%"></div></div>
     <div class="text-sm font-semibold ${left <= 0 ? 'text-[#1f6f4a]' : ''}">${left <= 0 ? '🎉 Fully claimed' : `${got} of ${i.qty} claimed`}</div>
     ${my ? `<div class="flex flex-wrap items-center gap-2 text-sm">You claimed
         <select id="cq${my.id}" aria-label="Your claimed quantity" class="inp !w-auto text-sm">${Array.from({length: my.qty + left}, (_, k) => `<option ${k + 1 === my.qty ? 'selected' : ''}>${k + 1}</option>`).join('')}</select>
         ${my.bought ? '· bought ✅' : ''}
         <button onclick="updateClaimQty(${my.id})" class="${sm} ghost">Update</button>
-        ${my.bought ? '' : `<button onclick="markBought(${my.id})" class="${sm} green">Mark bought</button>`}
+        ${my.bought ? '' : `<button onclick="markBought(${my.id}, this)" class="${sm} green">Mark bought</button>`}
         <button onclick="unclaim(${my.id})" class="${sm} ghost">Unclaim</button></div>`
     : left > 0 ? `<div class="flex flex-wrap gap-2">
         <select id="q${i.id}" aria-label="Quantity to claim" class="inp !w-auto text-sm">${Array.from({length: left}, (_, k) => `<option>${k + 1}</option>`).join('')}</select>
-        <button onclick="claim(${i.id})" class="${sm} red">Claim</button>
-        <button onclick="claim(${i.id}, true)" class="${sm} green">Bought it</button></div>` : ''}
+        <button onclick="claim(${i.id}, false, this)" class="${sm} red flex-1">Claim</button>
+        <button onclick="claim(${i.id}, true, this)" class="${sm} green flex-1">Bought it</button></div>` : ''}
   </div>`;
 }
 
@@ -924,29 +1165,114 @@ function claimBox(i, got, left) {
 async function run(q, then) {
   const {error} = await q;
   if (error) return toast(error.message);
-  then?.(); route();
+  then?.(); await closeDlg($('#sheet')); route();
 }
-const claim = (id, bought = false) => run(sb.from('claims').insert({item_id: id, qty: +$('#q' + id).value, bought}), () => { bought ? gifts() : snow(); toast(cheer()); });
-const markBought = id => run(sb.from('claims').update({bought: true}).eq('id', id), () => { gifts(); toast(cheer()); });
+// Claim moment: tick draws on the button, the bar fills, a small burst leaves the button;
+// then the sheet slides away and the card pulses once. (The bar keeps its width transition:
+// a scaleX fill would stretch the barber stripes.)
+const TICK = '<svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>';
+async function claim(id, bought = false, btn) {
+  const qty = +$('#q' + id).value, i = items.find(x => x.id === id);
+  const {error} = await sb.from('claims').insert({item_id: id, qty, bought});
+  if (error) return toast(error.message);
+  if (bought) gifts();
+  toast(cheer());
+  btn.innerHTML = TICK + (bought ? ' Bought' : ' Claimed'); btn.disabled = true;
+  const bar = $('#sheet .claimbar');
+  if (bar && i) bar.style.width = Math.min(100, Math.round((i.qty - leftOf(i) + qty) / i.qty * 100)) + '%';
+  const r = btn.getBoundingClientRect();
+  confetti({particleCount: 16, spread: 55, startVelocity: 16, gravity: 1.1, ticks: 70, scalar: .7, disableForReducedMotion: true,
+    colors: ['#1f6f4a', '#f4c430', '#c0392b'], origin: {x: (r.left + r.width / 2) / innerWidth, y: r.top / innerHeight}});
+  settle(id);
+}
+function settle(id) {
+  setTimeout(async () => {
+    await closeDlg($('#sheet')); await route();
+    const el = id && $('#item' + id);
+    if (el) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
+  }, RM.matches ? 0 : 700);
+}
+// Bought: the button turns into a stamp, then the sheet (or stash list) refreshes.
+async function markBought(id, btn, then) {
+  const {error} = await sb.from('claims').update({bought: true}).eq('id', id);
+  if (error) return toast(error.message);
+  gifts(); toast(cheer());
+  if (btn) btn.outerHTML = '<span class="stamp">✓ Bought</span>';
+  then ? setTimeout(then, RM.matches ? 0 : 700) : settle();
+}
 const updateClaimQty = id => run(sb.from('claims').update({qty: +$('#cq' + id).value}).eq('id', id));
 const unclaim = id => run(sb.from('claims').delete().eq('id', id));
-const delItem = id => confirm('Delete this wish?') && run(sb.from('items').delete().eq('id', id));
+// Delete waits out a 5s Undo window before touching the database; closing the tab in that window keeps the wish.
+function delItem(id) {
+  gone.add(id); vt(paint, {reflow: true});
+  const t = setTimeout(() => { gone.delete(id); run(sb.from('items').delete().eq('id', id)); }, 5000);
+  toast('Wish deleted', () => { clearTimeout(t); gone.delete(id); vt(paint, {reflow: true}); });
+}
 
+// ponytail: live updates without leaking claims to owners. Realtime DELETE events skip RLS, so nobody
+// subscribes to claims (and claims stays out of the publication; rls_check.sql asserts it). We listen to
+// items only, and refetch claims for others' lists on focus and every 30s. Upgrade if 30s feels slow:
+// a broadcast "something changed" ping on a channel that carries no ids.
+let refreshT = 0;
+function refresh() {
+  clearTimeout(refreshT);
+  refreshT = setTimeout(() => {
+    // don't yank the page while someone is mid-form or has a menu open
+    if (me && !document.hidden && !$('#listView').classList.contains('hidden') && !document.querySelector('dialog[open],details.more[open]')) route();
+  }, 400);
+}
+function goLive() {
+  if (goLive.on) return;
+  goLive.on = sb.channel('items-live').on('postgres_changes', {event: '*', schema: 'public', table: 'items'}, refresh).subscribe();
+  addEventListener('visibilitychange', refresh);
+  setInterval(() => curMine || refresh(), 30000);
+}
+
+const PV_HINT = 'Paste a link, or tap 📸 to take or pick a photo';
+function pv() {
+  const E = $('#itemForm').elements, img = safe(E.image.value.trim());
+  $('#pv').innerHTML = img ? `<img src="${esc(img)}" alt="" class="w-full h-full object-cover" onerror="this.outerHTML='🎁'">` : '🎁';
+  $('#pvName').textContent = E.name.value.trim() || PV_HINT;
+}
 function openItem(id) {
-  const f = $('#itemForm'), it = items.find(i => i.id === id) || {qty: 1, desire: 3};
+  const f = $('#itemForm'), it = (inAdm() ? admItems : items).find(i => i.id === id) || {qty: 1, desire: 3};
   f.dataset.id = id || '';
   for (const el of f.elements) if (el.name) el.value = it[el.name] ?? '';
   f.elements.url.dataset.done = it.url || '';
+  $('#more').open = !!id; // editing: show everything; adding: just the link/photo
+  pv();
   $('#itemDlg').showModal();
 }
 $('#addBtn').onclick = () => openItem();
+$('#itemForm').elements.image.oninput = $('#itemForm').elements.name.oninput = pv;
 $('#itemForm').onsubmit = async e => {
   e.preventDefault();
   const row = Object.fromEntries(new FormData(e.target)), id = e.target.dataset.id;
-  row.price ||= null;
+  row.name = row.name.trim();
+  if (!row.name) { $('#more').open = true; e.target.elements.name.focus(); return toast('Give your wish a name ✏️'); }
+  row.price ||= null; row.image = safe(row.image.trim()) || null;
+  row.url = safe((row.url.match(/https?:\/\/\S+/) || [''])[0]) || null;
+  if (!row.image) row.img_tries = 0; // let the hourly picture finder try again
+  if (inAdm() && !id) row.owner = $('#admWho').value; // admin adding to someone else's list
   const {error} = await (id ? sb.from('items').update(row).eq('id', id) : sb.from('items').insert(row));
   if (error) return toast(error.message);
-  $('#itemDlg').close(); if (!id) { snow(); toast('Wish added 🎄'); } route();
+  await closeDlg($('#itemDlg')); if (!id) { snow(); toast('Wish added 🎄'); } inAdm() ? loadAdmin() : route({reflow: !id});
+};
+// 📸 Take or pick a photo: cropped square (what the card shows), stored in your own folder.
+$('#photoFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  toast('Uploading photo…');
+  try {
+    const path = `${uid}/${Date.now()}.jpg`;
+    const {error} = await sb.storage.from('item-photos').upload(path, await squareBlob(f, 800), {contentType: 'image/jpeg'});
+    if (error) throw error;
+    const E = $('#itemForm').elements;
+    E.image.value = sb.storage.from('item-photos').getPublicUrl(path).data.publicUrl;
+    pv();
+    if (!E.name.value.trim()) { $('#more').open = true; E.name.focus(); toast('Photo added 📸 Now give it a name.'); }
+    else toast('Photo added 📸');
+  } catch (err) { toast(err.message || 'Upload failed'); }
 };
 
 // ---------- auto-fill from Open Graph ----------
@@ -963,13 +1289,17 @@ function slugName(u) {
     return cand ? decodeURIComponent(cand).replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase()) : '';
   } catch { return ''; }
 }
+// Picture chain: Open Graph -> microlink -> JSON-LD Product -> microlink screenshot -> 📸 (the user's own photo).
+// The Shortcut/bookmarklet beats all of these: it reads the page in your own browser, so bot walls don't apply.
 async function autofill() {
-  const E = $('#itemForm').elements, u = safe(E.url.value.trim());
+  const E = $('#itemForm').elements, u = safe((E.url.value.trim().match(/https?:\/\/\S+/) || [''])[0]);
   if (!u || E.url.dataset.done === u) return;
-  E.url.dataset.done = u;
+  E.url.value = u; E.url.dataset.done = u;
   const host = new URL(u).hostname.replace(/^www\./, '');
   E.store.value ||= STORE_NAMES[host] || host;
-  toast('Looking up item…');
+  $('#pv').innerHTML = '<span class="text-sm opacity-60 animate-pulse">🔎</span>'; $('#pvName').textContent = 'Looking it up…';
+  const ml = async q => (await fetch('https://api.microlink.io/?url=' + encodeURIComponent(u) + q, {signal: AbortSignal.timeout(12000)})).json();
+  let ld = {}, shot = false;
   try {
     let htmlText = '';
     // Etsy blocks every free fetcher (verified), so skip straight to the link-name fallback for it.
@@ -980,22 +1310,19 @@ async function autofill() {
     if (!htmlText) throw new Error('fetch failed');
     const d = new DOMParser().parseFromString(htmlText, 'text/html');
     const m = k => d.querySelector(`meta[property="${k}"],meta[name="${k}"]`)?.content?.trim();
-    // JSON-LD product data first: many stores embed name, image and price here even when OG tags are thin.
+    // JSON-LD product data: name and price now; its image only if OG and microlink find none.
     try {
       const flat = o => [o, ...(o?.['@graph'] || []), ...(Array.isArray(o) ? o : [])];
       for (const s of d.querySelectorAll('script[type="application/ld+json"]')) {
         const prod = flat(JSON.parse(s.textContent)).find(o => o && ([].concat(o['@type']).includes('Product') || o.offers));
         if (!prod) continue;
-        E.name.value ||= (prod.name || '').trim();
-        const pimg = Array.isArray(prod.image) ? prod.image[0] : prod.image;
-        if (pimg) E.image.value ||= new URL(pimg, u).href;
-        const off = Array.isArray(prod.offers) ? prod.offers[0] : prod.offers;
-        const lp = parseFloat(off?.price ?? off?.lowPrice);
-        if (lp) E.price.value ||= lp;
-        if (E.name.value) break;
+        const pimg = [].concat(prod.image)[0], off = [].concat(prod.offers)[0];
+        ld = {name: (prod.name || '').trim(), image: pimg && new URL(pimg.url || pimg, u).href, price: parseFloat(off?.price ?? off?.lowPrice)};
+        break;
       }
     } catch {}
-    E.name.value ||= m('og:title') || d.title.trim();
+    E.name.value ||= ld.name || m('og:title') || d.title.trim();
+    // 1. Open Graph
     const img = m('og:image') || m('twitter:image');
     if (img) E.image.value ||= new URL(img, u).href;
     // Amazon-style pages: no OG tags in the fetched copy, but the title element and a dynamic-image block are there.
@@ -1008,26 +1335,82 @@ async function autofill() {
       const mm = dyn.match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);
       if (mm) E.image.value = mm[0].replace(/_AC_SS\d+_/, '_AC_SL500_');
     }
-    const price = parseFloat((m('product:price:amount') || m('og:price:amount') || '').replace(/[^\d.]/g, ''));
+    const price = ld.price || parseFloat((m('product:price:amount') || m('og:price:amount') || '').replace(/[^\d.]/g, ''));
     if (price) E.price.value ||= price;
     if (E.store.value === host) E.store.value = m('og:site_name') || host;
   } catch {}
-  // Last network fallback: microlink returns parsed metadata (title, image, publisher) as JSON.
+  // 2. microlink: parsed metadata (title, image, publisher) as JSON.
   if (!E.name.value || !E.image.value) try {
-    const j = await (await fetch('https://api.microlink.io/?url=' + encodeURIComponent(u), {signal: AbortSignal.timeout(9000)})).json();
+    const j = await ml('');
     if (j.status === 'success') {
       E.name.value ||= (j.data.title || '').trim();
       if (j.data.image?.url) E.image.value ||= j.data.image.url;
       if (E.store.value === host && j.data.publisher) E.store.value = j.data.publisher;
     }
   } catch {}
+  // 3. JSON-LD Product image.
+  if (!E.image.value && ld.image) E.image.value = ld.image;
+  // 4. A screenshot of the page. Can be a "prove you're human" page; the preview shows it before Save.
+  // ponytail: stores microlink's CDN link as-is; copy it into item-photos if those links start expiring.
+  if (!E.image.value && host !== 'etsy.com') try {
+    const j = await ml('&screenshot=true&meta=false');
+    if (j.data?.screenshot?.url) { E.image.value = j.data.screenshot.url; shot = true; }
+  } catch {}
   // Fallback that always works: Etsy and some other stores block scrapers, but the item name is in the link itself.
   E.name.value ||= slugName(u);
   E.name.value = E.name.value.replace(/^Amazon\.com:\s*/i, '').replace(/\s+[-|]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
-  if (E.name.value && E.image.value) toast('Auto-filled ✨');
-  else if (E.name.value) toast('Name filled ✨ This store blocks photo lookup. Right-click the photo on the store page, Copy Image Address, and paste it into Image URL.');
-  else toast("Couldn't auto-fill. Enter details by hand.");
+  pv();
+  if (shot) toast('Got a snapshot of the page 📷 Not right? Tap 📸 for a real photo.');
+  else if (E.name.value && E.image.value) toast('Auto-filled ✨');
+  else if (E.name.value) toast('Name filled ✨ No picture found yet: tap 📸, or save and we will keep looking.');
+  else toast("Couldn't auto-fill. Tap More details to enter it by hand.");
 }
+
+// ---------- admin: fix anyone's list (admin.sql's RLS is the real lock; this is just the screen) ----------
+let admItems = [];
+const inAdm = () => !$('#adminView').classList.contains('hidden');
+async function openAdmin() {
+  const keep = $('#admWho').value;
+  $('#admWho').innerHTML = fam.map(f => `<option value="${f.id}">${esc(f.name)}${f.id === uid ? ' (me)' : ''}</option>`).join('');
+  if (keep) $('#admWho').value = keep;
+  await loadAdmin(); show('adminView');
+}
+async function loadAdmin() {
+  const id = $('#admWho').value;
+  // no claims(*) here: the admin view never shows who claimed what
+  const {data, error} = await sb.from('items').select('*').eq('owner', id).order('desire', {ascending: false}).order('created_at');
+  if (error) return toast(error.message);
+  admItems = data;
+  $('#admName').value = fam.find(f => f.id === id)?.name || '';
+  $('#admList').innerHTML = data.map(i => `<div class="card p-3 flex items-center gap-3">
+      ${safe(i.image) ? `<img src="${esc(i.image)}" class="w-14 h-14 rounded-xl object-cover flex-none" alt="">` : '<span class="text-3xl w-14 text-center flex-none">🎁</span>'}
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold truncate">${esc(i.name)}</p>
+        <p class="text-sm opacity-70">${[i.price && `$${(+i.price).toFixed(2)}`, esc(i.store), DESIRE[i.desire], i.qty > 1 && `qty ${i.qty}`].filter(Boolean).join(' · ')}</p>
+      </div>
+      <button class="btn ghost text-sm" onclick="openItem(${i.id})">✏️ Edit</button>
+      <button class="btn ghost text-sm" onclick="admDel(${i.id})" aria-label="Delete">🗑</button>
+    </div>`).join('') || '<p class="text-center py-10 opacity-70">No wishes on this list yet.</p>';
+}
+async function admDel(id) {
+  const i = admItems.find(x => x.id === id);
+  if (!i || !confirm(`Delete "${i.name}"? Any claims on it go too.`)) return;
+  const {error} = await sb.from('items').delete().eq('id', id);
+  if (error) return toast(error.message);
+  toast('Wish deleted'); loadAdmin();
+}
+async function saveAdmName() {
+  const id = $('#admWho').value, name = $('#admName').value.trim();
+  if (!name) return toast('A name is needed ✏️');
+  // RLS refusals on update come back as zero rows, not an error
+  const {data, error} = await sb.from('profiles').update({name}).eq('id', id).select();
+  if (error) return toast(error.message);
+  if (!data.length) return toast('Not allowed. Has admin.sql been run?');
+  fam.find(f => f.id === id).name = name;
+  $('#admWho').selectedOptions[0].textContent = name + (id === uid ? ' (me)' : '');
+  toast('Name saved ✨');
+}
+$('#adminBtn').onclick = openAdmin;
 
 // ---------- share ----------
 async function share(title, url, text = title) {
