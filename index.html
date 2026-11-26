@@ -858,14 +858,25 @@ function checkPrefill() {
   openItem();
   const E = $('#itemForm').elements;
   E.url.value = p.url || ''; E.url.dataset.done = p.url || '';
-  E.name.value = (p.name || '').replace(/^Amazon\.com:\s*/i, '').replace(/\s+[-|]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
+  E.name.value = cleanName(p.name);
   E.image.value = p.image || '';
   E.store.value = p.store || '';
   if (p.price) E.price.value = parseFloat(p.price) || '';
   pv();
   toast('Filled from the store page ✨ Check it and Save.');
   // Shares from a phone often carry only the link; run the normal lookup to fill the rest.
-  if (!p.name && p.url) { E.url.dataset.done = ''; autofill(); }
+  if (!E.name.value && p.url) { E.url.dataset.done = ''; autofill(); }
+}
+// Names arrive as page titles, or from the Chrome shortcut as raw matches like
+// `id="productTitle" ...> Name` / `<title>Amazon.com: Name : Category`. Turn any of them into just the name.
+function cleanName(raw = '') {
+  const lines = raw.split('\n').map(s => s.trim()).filter(Boolean);
+  let s = lines.find(l => l.startsWith('id="productTitle"')) || lines[0] || '';
+  s = new DOMParser().parseFromString(s.replace(/^(id="productTitle"|<title)[^>]*>/i, ''), 'text/html').body.textContent.trim();
+  const amz = /^Amazon\.com\s*:/i.test(s);
+  s = s.replace(/^Amazon\.com\s*:\s*/i, '').replace(/\s+[-|:]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
+  if (amz) s = s.replace(/\s*:\s*[^:]{2,40}$/, ''); // Amazon appends ": Category"
+  return /^(amazon\.com|robot check|sorry!?.*|page not found)$/i.test(s) ? '' : s.replace(/\s+/g, ' ');
 }
 window.onhashchange = () => me && route();
 
