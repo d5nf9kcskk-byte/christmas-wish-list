@@ -243,7 +243,7 @@
         <div class="space-y-2">
           <p class="font-semibold">1. What are you using?</p>
           <div data-q="dev" class="flex flex-wrap gap-2">
-            <button type="button" class="btn ghost text-sm" data-v="iphone">🍎 iPhone</button>
+            <button type="button" class="btn ghost text-sm" data-v="iphone">🍎 iPhone or iPad</button>
             <button type="button" class="btn ghost text-sm" data-v="android">🤖 Android</button>
             <button type="button" class="btn ghost text-sm" data-v="computer">💻 Computer</button>
           </div>
@@ -267,17 +267,18 @@
           <a class="btn green inline-block" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List.shortcut">📥 Get the shortcut</a>
           <ol class="list-decimal ml-5 space-y-1">
             <li>Open the download and tap <strong>Add Shortcut</strong>.</li>
-            <li>In <strong>Settings → Apps → Shortcuts → Advanced</strong>, turn on <strong>Allow Running Scripts</strong>.</li>
+            <li>In <strong>Settings → Apps → Shortcuts → Advanced</strong>, turn on <strong>Allow Running Scripts</strong>. It's off on new devices, and the shortcut can't turn it on for you.</li>
             <li>On an item's page, tap <strong>Share → Add to Wish List</strong>.</li>
           </ol>
+          <p class="opacity-70">The first time on each store, it asks permission. Tap <strong>Always Allow</strong>. If it stops, share again; the second try works.</p>
         </div>
         <div data-key="iphone-chrome" hidden class="space-y-2">
-          <a class="btn green inline-block" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List%20(Chrome).shortcut">📥 Get the shortcut</a>
+          <a class="btn green inline-block" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List%20(Chrome).shortcut?v=4">📥 Get the shortcut</a>
           <ol class="list-decimal ml-5 space-y-1">
             <li>Open the download and tap <strong>Add Shortcut</strong>.</li>
             <li>On an item's page, tap <strong>Share → Add to Wish List (Chrome)</strong>.</li>
           </ol>
-          <p class="opacity-70">If the photo or price is missing, add it before you save.</p>
+          <p class="opacity-70">The first time on each store, it asks permission. Tap <strong>Always Allow</strong>. If it stops, share again; the second try works. If the photo or price is missing, add it before you save.</p>
         </div>
         <div data-key="android" hidden class="space-y-2">
           <ol class="list-decimal ml-5 space-y-1">
@@ -869,14 +870,21 @@ function checkPrefill() {
 }
 // Names arrive as page titles, or from the Chrome shortcut as raw matches like
 // `id="productTitle" ...> Name` / `<title>Amazon.com: Name : Category`. Turn any of them into just the name.
+// The Chrome shortcut sends several candidates, one per line (Shortcuts' "Get Name", then page matches);
+// productTitle wins, otherwise the first line that cleans up to a real name.
 function cleanName(raw = '') {
   const lines = raw.split('\n').map(s => s.trim()).filter(Boolean);
-  let s = lines.find(l => l.startsWith('id="productTitle"')) || lines[0] || '';
-  s = new DOMParser().parseFromString(s.replace(/^(id="productTitle"|<title)[^>]*>/i, ''), 'text/html').body.textContent.trim();
-  const amz = /^Amazon\.com\s*:/i.test(s);
-  s = s.replace(/^Amazon\.com\s*:\s*/i, '').replace(/\s+[-|:]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
-  if (amz) s = s.replace(/\s*:\s*[^:]{2,40}$/, ''); // Amazon appends ": Category"
-  return /^(amazon\.com|robot check|sorry!?.*|page not found)$/i.test(s) ? '' : s.replace(/\s+/g, ' ');
+  lines.sort((a, b) => b.startsWith('id="productTitle"') - a.startsWith('id="productTitle"'));
+  for (let s of lines) {
+    s = new DOMParser().parseFromString(s.replace(/^(id="productTitle"|<title)[^>]*>/i, ''), 'text/html').body.textContent.trim();
+    const amz = /^Amazon\.com\s*:/i.test(s);
+    s = s.replace(/^Amazon\.com\s*:\s*/i, '').replace(/\s+[-|:]\s*(Etsy|Amazon\.com|Target|Walmart\.com|eBay)$/i, '');
+    if (amz) s = s.replace(/\s*:\s*[^:]{2,40}$/, ''); // Amazon appends ": Category"
+    s = s.replace(/\s+/g, ' ');
+    const junk = /^(amazon\.com|robot check|sorry!?.*|page not found)$/i.test(s) || /^(https?:\/\/|www\.)|^[\w.-]+\.[a-z]{2,}(\/\S*)?$/i.test(s);
+    if (s && !junk) return s;
+  }
+  return '';
 }
 window.onhashchange = () => me && route();
 
