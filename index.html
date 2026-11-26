@@ -31,6 +31,7 @@
   .red{background:#c0392b;color:#fff} .red:hover{background:#a93226}
   .green{background:#1f6f4a;color:#fff} .green:hover{background:#185a3c}
   .ghost{background:#fff;border:2px solid #f3d9c6;color:#3b1d14} .ghost:hover{border-color:#c0392b}
+  #setup [aria-pressed="true"]{background:#1f6f4a;border-color:#1f6f4a;color:#fff}
   .inp{width:100%;border:2px solid #f3d9c6;border-radius:1rem;padding:.6rem .9rem;background:#fff;transition:border-color .2s}
   .inp:focus{outline:none;border-color:#c0392b}
   .card{background:#fff;border-radius:1.75rem;overflow:hidden;box-shadow:0 4px 14px #3b1d1412;transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .25s,opacity .35s cubic-bezier(.22,1,.36,1)}
@@ -237,92 +238,71 @@
         <h3 class="font-xmas text-3xl flex-1">🧰 Adding from other stores</h3>
         <button type="button" class="btn ghost text-sm" onclick="var b=document.getElementById('bmBody');b.classList.toggle('hidden');this.textContent=b.classList.contains('hidden')?'Setup ▾':'Hide ▴'">Setup ▾</button>
       </div>
-      <p class="opacity-70">One-click adding from Amazon, Etsy, and other stores. One-time setup, per device. Open Setup only when you need it; the rest of the time this stays tucked away.</p>
-      <div id="bmBody" class="hidden space-y-3 pt-1">
-      <div class="border-l-4 border-[#1f6f4a] pl-3 py-1">
-        <p class="font-semibold mb-1">Pick your device:</p>
-        <ul class="space-y-1">
-          <li>💻 <strong>Computer with Chrome:</strong> the tree extension, in its section below. Nothing can block it; it is the one to use for Amazon. The bookmark button right under this box also works, on pages that allow it.</li>
-          <li>🤖 <strong>Android phone:</strong> Add to Home screen once, then Share → Wish List from any store app. See the Android section below.</li>
-          <li>🍎 <strong>iPhone:</strong> download the ready-made shortcut in the iPhone section below (one tap to install). It lives in the Share button, so it works in portrait mode, unlike the bookmarklet. Paste-a-link also always works.</li>
-        </ul>
-      </div>
-      <p><strong>The bookmark (any desktop browser).</strong> Adding from Etsy, Amazon, Nike, or another store that blocks lookup? Drag this button to your bookmarks bar. Then open the item's own page in that store, not a search results or shop page, and click the bookmark there. It reads the name, photo, and price from the page you are looking at and opens your list with everything filled in. <strong>Already had the bookmark?</strong> Delete the old one and drag this new version: it opens the tab first, so Chrome's popup blocker cannot silently stop it, and if a new tab is blocked anyway it opens your list in the same tab instead of doing nothing.</p>
+      <p class="opacity-70">Add things from any store in one tap. Set it up once on each phone or computer.</p>
+      <div id="bmBody" class="hidden pt-1"><div id="setup" class="space-y-4">
+        <div class="space-y-2">
+          <p class="font-semibold">1. What are you using?</p>
+          <div data-q="dev" class="flex flex-wrap gap-2">
+            <button type="button" class="btn ghost text-sm" data-v="iphone">🍎 iPhone</button>
+            <button type="button" class="btn ghost text-sm" data-v="android">🤖 Android</button>
+            <button type="button" class="btn ghost text-sm" data-v="computer">💻 Computer</button>
+          </div>
+        </div>
+        <div data-dev="iphone" hidden class="space-y-2">
+          <p class="font-semibold">2. Which browser?</p>
+          <div data-q="br" class="flex flex-wrap gap-2">
+            <button type="button" class="btn ghost text-sm" data-v="safari">Safari</button>
+            <button type="button" class="btn ghost text-sm" data-v="chrome">Chrome</button>
+          </div>
+        </div>
+        <div data-dev="computer" hidden class="space-y-2">
+          <p class="font-semibold">2. Which browser?</p>
+          <div data-q="br" class="flex flex-wrap gap-2">
+            <button type="button" class="btn ghost text-sm" data-v="chrome">Chrome</button>
+            <button type="button" class="btn ghost text-sm" data-v="other">Another browser</button>
+          </div>
+        </div>
+
+        <div data-key="iphone-safari" hidden class="space-y-2">
+          <a class="btn green inline-block" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List.shortcut">📥 Get the shortcut</a>
+          <ol class="list-decimal ml-5 space-y-1">
+            <li>Open the download and tap <strong>Add Shortcut</strong>.</li>
+            <li>In <strong>Settings → Apps → Shortcuts → Advanced</strong>, turn on <strong>Allow Running Scripts</strong>.</li>
+            <li>On an item's page, tap <strong>Share → Add to Wish List</strong>.</li>
+          </ol>
+        </div>
+        <div data-key="iphone-chrome" hidden class="space-y-2">
+          <a class="btn green inline-block" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List%20(Chrome).shortcut">📥 Get the shortcut</a>
+          <ol class="list-decimal ml-5 space-y-1">
+            <li>Open the download and tap <strong>Add Shortcut</strong>.</li>
+            <li>On an item's page, tap <strong>Share → Add to Wish List (Chrome)</strong>.</li>
+          </ol>
+          <p class="opacity-70">If the photo or price is missing, add it before you save.</p>
+        </div>
+        <div data-key="android" hidden class="space-y-2">
+          <ol class="list-decimal ml-5 space-y-1">
+            <li>Open this list in Chrome, tap <strong>⋮</strong>, then <strong>Add to Home screen</strong>.</li>
+            <li>On an item, or in a store's app, tap <strong>Share → Wish List</strong>.</li>
+          </ol>
+        </div>
+        <div data-key="computer-chrome" hidden class="space-y-2">
+          <a class="btn green inline-block" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/wish-list-extension.zip">📥 Get the extension</a>
+          <ol class="list-decimal ml-5 space-y-1">
+            <li>Unzip it. You get a folder called <strong>extension</strong>.</li>
+            <li>Go to <strong>chrome://extensions</strong>, turn on <strong>Developer mode</strong>, click <strong>Load unpacked</strong>, and pick that folder.</li>
+            <li>Pin the 🎄. On an item's page, click it.</li>
+          </ol>
+          <p class="opacity-70">Chrome may remind you about developer extensions when it starts. That's fine; dismiss it.</p>
+        </div>
+        <div data-key="computer-other" hidden class="space-y-2">
+          <p>Drag this button to your bookmarks bar:</p>
       <a id="bmLink" class="btn red inline-block" href="javascript:(function(){var T='https://d5nf9kcskk-byte.github.io/christmas-wish-list/';var w=null;try{w=window.open('about:blank','_blank')}catch(e){}var u='';try{var m=function(k){var e=document.querySelector('meta[property=&quot;'+k+'&quot;],meta[name=&quot;'+k+'&quot;]');return e?e.content:''};var price='';try{var ss=document.querySelectorAll('script[type=&quot;application/ld+json&quot;]');for(var i=0;i<ss.length;i++){var j=JSON.parse(ss[i].textContent);var a=(Array.isArray(j)?j:[j]).concat(j['@graph']||[]);for(var x=0;x<a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';if(price)break}}if(price)break}}catch(e){}var img=m('og:image');if(!img){var dyn=document.querySelector('[data-a-dynamic-image]');if(dyn){var mm=dyn.getAttribute('data-a-dynamic-image').match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);if(mm)img=mm[0].replace(/_AC_SS\d+_/,'_AC_SL500_')}}var name=m('og:title')||document.title;var pt=document.querySelector('#productTitle');if(pt)name=pt.textContent.trim().replace(/\s+/g,' ');var p=new URLSearchParams({prefill:'1',bm:'2',name:name,url:location.href,image:img,price:String(price||m('product:price:amount')||''),store:m('og:site_name')});u=T+'?'+p.toString()}catch(e){u=T+'?prefill=1&amp;bm=2&amp;url='+encodeURIComponent(location.href)+'&amp;name='+encodeURIComponent(document.title||'')}if(w){w.location.href=u}else{location.href=u}})()">🎁 Add to my Wish List</a>
-      <p class="text-xs opacity-60">Works in desktop browsers. On a phone, paste the link as usual and use the photo tip in the add form.</p>
-      <button type="button" class="btn ghost text-sm" onclick="navigator.clipboard.writeText(document.getElementById('bmLink').href).then(() => toast('Bookmarklet code copied!'))">Copy bookmarklet code (needed for phone setup)</button>
-      <details class="text-sm">
-        <summary class="font-semibold cursor-pointer">Clicked the bookmark on Amazon and nothing happened?</summary>
-        <ol class="list-decimal ml-5 mt-1 space-y-1">
-          <li>First make sure you have the new version: delete the old bookmark, then drag the button above up to the bookmarks bar again.</li>
-          <li>Test the new bookmark on a plain page, like any Wikipedia article. If your list opens there, the bookmark is installed correctly.</li>
-          <li>If it does nothing everywhere: right-click the bookmark, choose Edit, and look at the address. It has to start with <strong>javascript:</strong> and be very long. If it starts with https or is short, the drag did not take. Delete it, tap <strong>Copy bookmarklet code</strong> above, add a bookmark by hand, and paste the code in as its address.</li>
-          <li>If it works on other pages but not on an Amazon item page, that page is refusing to run it; Amazon does this on some pages now. Workaround for that item: copy the item's link, come back here, tap <strong>+ Add wish</strong>, and paste the link. The name usually fills in; if the photo does not, use the photo tip inside the add form.</li>
-        </ol>
-      </details>
-      <details class="text-sm">
-        <summary class="font-semibold cursor-pointer">Using Chrome on a computer? The extension never gets blocked (best for Amazon)</summary>
-        <ol class="list-decimal ml-5 mt-1 space-y-1">
-          <li>Download <a class="underline font-semibold" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/wish-list-extension.zip">wish-list-extension.zip</a> and unzip it. You get a folder called <strong>extension</strong>.</li>
-          <li>In Chrome, open <strong>chrome://extensions</strong> and turn on <strong>Developer mode</strong> (top right).</li>
-          <li>Click <strong>Load unpacked</strong> and choose that extension folder.</li>
-          <li>Pin the little tree 🎄 to the toolbar. From then on, on any item page, Amazon included, one click on the tree opens your list with the name, photo, and price filled in. No bookmark, no popup blocker, nothing for the store page to refuse.</li>
-        </ol>
-        <p class="mt-1 opacity-70">One quirk: Chrome may show a "developer mode extensions" notice when it starts. It is just a reminder that you installed it yourself; dismiss it and the tree keeps working.</p>
-      </details>
-      <details class="text-sm">
-        <summary class="font-semibold cursor-pointer">On an Android phone: add from the Share button</summary>
-        <ol class="list-decimal ml-5 mt-1 space-y-1">
-          <li>Open this list in Chrome, tap the ⋮ menu, and choose <strong>Add to Home screen</strong> (or Install app).</li>
-          <li>After that, on any item page or in a store app, tap <strong>Share</strong> and choose <strong>Wish List</strong>.</li>
-          <li>Your list opens with the add form ready. The link always comes across; the name comes too when the store provides it, and the photo fills in for stores that allow lookup.</li>
-        </ol>
-      </details>
-      <details class="text-sm">
-        <summary class="font-semibold cursor-pointer">🍎 On an iPhone: the easy way (Shortcuts, works in portrait)</summary>
-        <p class="mt-1">The Safari bookmarklet is awkward on an iPhone because the bookmarks panel only slides in beside the page in landscape; in portrait you cannot see your bookmarks and the page at the same time. Apple's own Shortcuts app fixes it: the shortcut lives in the Share button, so it works in portrait and landscape, in Safari and in Chrome.</p>
-        <p class="mt-1"><strong>Easiest: download the ready-made shortcut.</strong> <a class="underline font-semibold" href="https://knxepbzsjzvcuplimjgv.supabase.co/storage/v1/object/public/avatars/Add%20to%20Wish%20List.shortcut">📥 Download Add to Wish List (.shortcut)</a></p>
-        <ol class="list-decimal ml-5 mt-1 space-y-1">
-          <li>On your iPhone, tap the download link above in Safari. It downloads the shortcut file.</li>
-          <li>Open the downloaded file (tap it in the download bar, or find it in Files → Downloads). Shortcuts opens and shows what it does.</li>
-          <li>If iOS blocks it as an untrusted shortcut, open <strong>Settings → Shortcuts</strong> and turn on <strong>Allow Untrusted Shortcuts</strong>, then open the file again.</li>
-          <li>Tap <strong>Add Shortcut</strong>.</li>
-          <li>Use it: on any item page in Safari, tap <strong>Share → Add to Wish List</strong>. Your list opens with the name, photo, and price filled in. The first time, tap <strong>Allow</strong> when it asks to run on that page.</li>
-        </ol>
-        <p class="mt-1">If Shortcuts refuses the file, build it by hand in two minutes instead:</p>
-        <ol class="list-decimal ml-5 mt-1 space-y-1">
-          <li>First, once: open <strong>Settings → Shortcuts → Advanced</strong> and turn on <strong>Allow Running Scripts</strong>. (On newer iOS, it is under Settings → Apps → Shortcuts → Advanced.)</li>
-          <li>Open the <strong>Shortcuts</strong> app, tap <strong>+</strong>, and add the action <strong>Run JavaScript on Web Page</strong>.</li>
-          <li>Tap <strong>Copy Shortcut code</strong> below and paste it in place of the action's sample script. The code ends with <code>completion(...)</code>; that line is what hands the result back, so keep it.</li>
-          <li>Add a second action below it: <strong>Open URLs</strong>, and set its address to the result of the JavaScript action (it shows as "Run JavaScript on Web Page" or "Shortcut Result").</li>
-          <li>Tap the shortcut's name, call it <strong>Add to Wish List</strong>, open its details (ⓘ), and turn on <strong>Show in Share Sheet</strong>.</li>
-        </ol>
-        <p class="mt-1 opacity-70">Once you have it working on your phone, you can send it to family in one tap: in the Shortcuts app, long-press it → Share → Copy iCloud Link, and send them that link.</p>
-        <button type="button" class="btn ghost text-sm mt-1" onclick="navigator.clipboard.writeText(document.getElementById('shortcutCode').textContent).then(() => toast('Shortcut code copied!'))">Copy Shortcut code</button>
-        <pre id="shortcutCode" class="mt-2 p-2 rounded-lg text-xs overflow-x-auto whitespace-pre" style="background:#ecf1ee">var m=function(k){var e=document.querySelector('meta[property="'+k+'"],meta[name="'+k+'"]');return e?e.content:''};
-var price='';
-try{var ss=document.querySelectorAll('script[type="application/ld+json"]');for(var i=0;i&lt;ss.length&amp;&amp;!price;i++){var j=JSON.parse(ss[i].textContent);var a=(Array.isArray(j)?j:[j]).concat(j['@graph']||[]);for(var x=0;x&lt;a.length;x++){var o=a[x];if(o&amp;&amp;o.offers){var f=Array.isArray(o.offers)?o.offers[0]:o.offers;price=f.price||f.lowPrice||'';if(price)break}}}}catch(e){}
-var img=m('og:image');
-if(!img){var dyn=document.querySelector('[data-a-dynamic-image]');if(dyn){var mm=dyn.getAttribute('data-a-dynamic-image').match(/https:\/\/m\.media-amazon\.com\/images\/I\/[\w%.-]+(?:\._[\w%.-]+)?\.jpg/);if(mm)img=mm[0].replace(/_AC_SS\d+_/,'_AC_SL500_')}}
-var name=m('og:title')||document.title;var pt=document.querySelector('#productTitle');if(pt)name=pt.textContent.trim().replace(/\s+/g,' ');
-var p=new URLSearchParams({prefill:'1',name:name,url:location.href,image:img,price:String(price||m('product:price:amount')||''),store:m('og:site_name')});
-completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString());</pre>
-      </details>
-      <details class="text-sm">
-        <summary class="font-semibold cursor-pointer">On an iPhone (Safari): the bookmarklet way, one time</summary>
-        <ol class="list-decimal ml-5 mt-1 space-y-1">
-          <li>Tap <strong>Copy bookmarklet code</strong> above.</li>
-          <li>In Safari, open any page and add a bookmark named <strong>Add to Wish List</strong> (Share button, then Add Bookmark).</li>
-          <li>Open Bookmarks, tap Edit, tap that bookmark, delete what is in the address field, and paste the code there. Save.</li>
-          <li>From then on: open the item's own page, open Bookmarks, and tap <strong>Add to Wish List</strong>. Your list opens with name, photo, and price filled in.</li>
-          <li>In Chrome on iPhone, a bookmarklet made on a computer with the same Google account syncs over by itself. To run it, type its name in the address bar and tap the bookmark in the suggestions; do not press Enter.</li>
-        </ol>
-      </details>
-      <details class="text-sm">
-        <summary class="font-semibold cursor-pointer">From the Etsy app</summary>
-        <p class="mt-1">The bookmarklet cannot run inside an app. In the Etsy app, tap Share and Copy Link, then paste the link into the add form here. The name and store fill in; for the photo, open the same link in your phone browser, long-press the photo, open it in a new tab, and copy that address into Image URL.</p>
-      </details>
-      </div>
+          <p>On an item's page, click the bookmark.</p>
+          <p class="opacity-70">Some Amazon pages block it. Then copy the link and paste it into <strong>+ Add wish</strong>.</p>
+        </div>
+
+        <p class="opacity-70 border-t border-[#f3d9c6] pt-3">Anywhere, anytime: copy the item's link, tap <strong>+ Add wish</strong>, and paste it.</p>
+      </div></div>
     </div>
     <div id="advBar" class="card reveal rv-t p-4 mb-5 hidden">
       <div class="flex items-baseline gap-3 flex-wrap">
@@ -460,7 +440,7 @@ completion('https://d5nf9kcskk-byte.github.io/christmas-wish-list/?'+p.toString(
 <div id="fireFx" aria-hidden="true"></div>
 <div id="frost" class="hidden" aria-hidden="true"></div>
 
-<div id="toast" role="status" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#3b1d14] text-white px-5 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50"></div>
+<div id="toast" role="status" popover="manual" class="top-auto right-auto m-0 border-0 overflow-visible fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#3b1d14] text-white px-5 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50"></div>
 
 <div id="treeTx" class="fixed inset-0 z-40 hidden place-items-center bg-[#14532d]/95" aria-hidden="true">
   <div class="text-center px-4">
@@ -533,6 +513,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 // label/ms rename the button and stretch the time (the update offer uses 'Update now').
 function toast(msg, undo, label = 'Undo', ms = 5000) {
   const t = $('#toast'), hide = () => { t.classList.add('opacity-0', 'pointer-events-none'); };
+  try { t.hidePopover(); t.showPopover(); } catch {} // re-enter the top layer so it shows above an open dialog
   t.textContent = msg; t.classList.remove('opacity-0');
   t.classList.toggle('pointer-events-none', !undo);
   if (undo) {
@@ -754,6 +735,18 @@ $('#orn').onclick = () => {
   toast('🔔 Jingle all the way!');
 };
 // Easter egg 5 is the reindeer sleigh crossing the footer (pure CSS, #deer); egg 6 is the Dec 25 banner in season().
+
+// Setup chooser: device, then browser (Android skips it), then one short answer.
+const setupPick = {};
+$('#setup').onclick = e => {
+  const b = e.target.closest('[data-v]'); if (!b) return;
+  const q = b.parentElement.dataset.q;
+  setupPick[q] = b.dataset.v; if (q === 'dev') delete setupPick.br;
+  const key = setupPick.dev === 'android' ? 'android' : setupPick.br && setupPick.dev + '-' + setupPick.br;
+  for (const r of $('#setup').querySelectorAll('[data-q]')) for (const x of r.children) x.setAttribute('aria-pressed', x.dataset.v === setupPick[r.dataset.q]);
+  for (const el of $('#setup').querySelectorAll('[data-dev]')) el.hidden = el.dataset.dev !== setupPick.dev;
+  for (const el of $('#setup').querySelectorAll('[data-key]')) el.hidden = el.dataset.key !== key;
+};
 
 // ---------- auth ----------
 const creds = () => ({email: $('#email').value.trim(), password: $('#pw').value});
@@ -1254,8 +1247,12 @@ $('#itemForm').onsubmit = async e => {
   row.url = safe((row.url.match(/https?:\/\/\S+/) || [''])[0]) || null;
   if (!row.image) row.img_tries = 0; // let the hourly picture finder try again
   if (inAdm() && !id) row.owner = $('#admWho').value; // admin adding to someone else's list
-  const {error} = await (id ? sb.from('items').update(row).eq('id', id) : sb.from('items').insert(row));
-  if (error) return toast(error.message);
+  const b = e.submitter; if (b) { b.disabled = true; b.textContent = 'Saving…'; }
+  let error;
+  try { ({error} = await (id ? sb.from('items').update(row).eq('id', id) : sb.from('items').insert(row))); }
+  catch (err) { error = err; }
+  finally { if (b) { b.disabled = false; b.textContent = 'Save'; } }
+  if (error) return toast(error.message || 'Save failed');
   await closeDlg($('#itemDlg')); if (!id) { snow(); toast('Wish added 🎄'); } inAdm() ? loadAdmin() : route({reflow: !id});
 };
 // 📸 Take or pick a photo: cropped square (what the card shows), stored in your own folder.
